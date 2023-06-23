@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/grpc"
 	"github.com/doggystylez/interstellar/types"
 	"github.com/golang/protobuf/proto"
 )

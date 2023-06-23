@@ -20,5 +20,7 @@ func Open(c *types.Client) (err error) {
 
 func Close(c *types.Client) {
 	c.CtxCancel()
-	c.Conn.Close()
+	if err := c.Conn.Close(); err != nil {
+		panic(err)
+	}
 }

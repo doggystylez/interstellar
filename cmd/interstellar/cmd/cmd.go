@@ -8,10 +8,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RootCmd() (err error) {
+func RootCmd() {
 	rootCmd := &cobra.Command{Use: "interstellar"}
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.AddCommand(txcli.TxCmd(), querycli.QueryCmd(), keycli.KeysCmd())
-	err = rootCmd.Execute()
-	return
+	err := rootCmd.Execute()
+	if err != nil {
+		panic(err)
+	}
 }

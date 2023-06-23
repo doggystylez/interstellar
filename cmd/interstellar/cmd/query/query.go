@@ -3,7 +3,7 @@ package querycli
 import (
 	"fmt"
 
-	"github.com/doggystylez/interstellar/client/query"
+	"github.com/doggystylez/interstellar/client/cosmos/query"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
 	"github.com/doggystylez/interstellar/types"
 	"github.com/spf13/cobra"

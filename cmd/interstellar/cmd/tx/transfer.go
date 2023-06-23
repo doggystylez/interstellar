@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/doggystylez/interstellar/client/query"
-	"github.com/doggystylez/interstellar/client/tx"
+	"github.com/doggystylez/interstellar/client/cosmos/query"
+	"github.com/doggystylez/interstellar/client/cosmos/tx"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
 	"github.com/spf13/cobra"
 )

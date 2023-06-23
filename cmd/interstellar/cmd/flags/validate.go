@@ -1,7 +1,7 @@
 package flags
 
 import (
-	"github.com/doggystylez/interstellar/client/query"
+	"github.com/doggystylez/interstellar/client/cosmos/query"
 	"github.com/doggystylez/interstellar/keys/address"
 	"github.com/doggystylez/interstellar/types"
 )

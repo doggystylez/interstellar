@@ -4,7 +4,7 @@ import (
 	"github.com/cosmos/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/grpc"
 	"github.com/doggystylez/interstellar/types"
 	"github.com/golang/protobuf/proto"
 )

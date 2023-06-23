@@ -10,7 +10,10 @@ import (
 )
 
 func SignFromPrivkey(msg []sdk.Msg, config types.InterstellarConfig) (txBytes []byte, err error) {
-	txConfig := buildTx(msg, config.TxInfo)
+	txConfig, err := buildTx(msg, config.TxInfo)
+	if err != nil {
+		return
+	}
 	sigData := signing.SingleSignatureData{
 		SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
 		Signature: nil,

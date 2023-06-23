@@ -6,7 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/grpc"
 	"github.com/doggystylez/interstellar/types"
 )
 

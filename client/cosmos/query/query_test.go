@@ -3,7 +3,7 @@ package query
 import (
 	"testing"
 
-	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/grpc"
 	"github.com/doggystylez/interstellar/keys/address"
 	"github.com/doggystylez/interstellar/types"
 )

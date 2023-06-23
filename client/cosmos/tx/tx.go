@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
-	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/grpc"
 	"github.com/doggystylez/interstellar/keys/keyring"
 	"github.com/doggystylez/interstellar/types"
 )
@@ -27,15 +27,15 @@ func AssembleAndBroadcast(msgInfo types.MsgInfo, config types.InterstellarConfig
 	return
 }
 
-func buildTx(msgs []sdk.Msg, txInfo types.TxInfo) (txConfig types.TxConfig) {
+func buildTx(msgs []sdk.Msg, txInfo types.TxInfo) (txConfig types.TxConfig, err error) {
 	txConfig = types.NewTxConfig()
 	if txInfo.FeeDenom != "" {
 		feeCoin := sdk.NewCoin(txInfo.FeeDenom, sdk.NewIntFromUint64(txInfo.FeeAmount))
 		txConfig.TxBuilder.SetFeeAmount(sdk.Coins{feeCoin})
 	}
 	txConfig.TxBuilder.SetGasLimit(txInfo.Gas)
-	txConfig.TxBuilder.SetMsgs(msgs...)
 	txConfig.TxBuilder.SetMemo(txInfo.Memo)
+	err = txConfig.TxBuilder.SetMsgs(msgs...)
 	return
 }
 
