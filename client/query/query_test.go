@@ -3,9 +3,7 @@ package query
 import (
 	"testing"
 
-	"github.com/doggystylez/interstellar/grpc"
-	"github.com/doggystylez/interstellar/keys/address"
-	"github.com/doggystylez/interstellar/types"
+	"github.com/doggystylez/interstellar/client/grpc"
 )
 
 const (
@@ -16,26 +14,18 @@ const (
 	testAccount = 849140
 )
 
-var testConfig = types.InterstellarConfig{
-	Rpc:    testClient,
-	TxInfo: types.TxInfo{Address: testAddress},
-}
-
-var testClient = types.Client{
+var testClient = grpc.Client{
 	Endpoint: testGrpc,
 	Timeout:  7,
 }
 
 func TestChainID(t *testing.T) {
-	err := grpc.Open(&testClient)
+	err := testClient.Open()
 	if err != nil {
 		panic(err)
 	}
-	defer grpc.Close(&testClient)
-	chainId, err := GetChainId(testClient)
-	if err != nil {
-		panic(err)
-	}
+	defer testClient.Close()
+	chainId := GetChainId(testClient)
 	if chainId.ChainId != testchainId {
 		t.Errorf("GetChainId failed - wanted %v, got %v", testchainId, chainId.ChainId)
 
@@ -43,15 +33,12 @@ func TestChainID(t *testing.T) {
 }
 
 func TestAccountInfo(t *testing.T) {
-	err := grpc.Open(&testClient)
+	err := testClient.Open()
 	if err != nil {
 		panic(err)
 	}
-	defer grpc.Close(&testClient)
-	account, err := GetAccountInfoFromAddress(testConfig)
-	if err != nil {
-		panic(err)
-	}
+	defer testClient.Close()
+	account := GetAccountInfoFromAddress(testAddress, testClient)
 	if account.Account != testAccount {
 		t.Errorf("getaccount failed - wanted %v, got %v", testAccount, account.Account)
 
@@ -59,15 +46,12 @@ func TestAccountInfo(t *testing.T) {
 }
 
 func TestGetPrefix(t *testing.T) {
-	err := grpc.Open(&testClient)
+	err := testClient.Open()
 	if err != nil {
 		panic(err)
 	}
-	defer grpc.Close(&testClient)
-	prefix, err := address.GetAddressPrefix(testClient)
-	if err != nil {
-		panic(err)
-	}
+	defer testClient.Close()
+	prefix := GetAddressPrefix(testClient)
 	if prefix != testPrefix {
 		t.Errorf("getprefix failed - wanted %v, got %v", testPrefix, prefix)
 

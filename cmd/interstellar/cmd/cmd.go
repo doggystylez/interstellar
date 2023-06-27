@@ -12,8 +12,5 @@ func RootCmd() {
 	rootCmd := &cobra.Command{Use: "interstellar"}
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.AddCommand(txcli.TxCmd(), querycli.QueryCmd(), keycli.KeysCmd())
-	err := rootCmd.Execute()
-	if err != nil {
-		panic(err)
-	}
+	_ = rootCmd.Execute()
 }

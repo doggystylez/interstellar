@@ -6,11 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ibctypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	"github.com/doggystylez/interstellar/types"
 )
 
-func MakeSendMsg(msgInfo types.MsgInfo) (msg sdk.Msg) {
-	coin := sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))
+func MakeSendMsg(msgInfo MsgInfo) (msg sdk.Msg) {
+	coin := sdk.NewCoin(msgInfo.Denom, msgInfo.Amount)
 	msg = &banktypes.MsgSend{
 		FromAddress: msgInfo.From,
 		ToAddress:   msgInfo.To,
@@ -19,8 +18,8 @@ func MakeSendMsg(msgInfo types.MsgInfo) (msg sdk.Msg) {
 	return
 }
 
-func MakeTransferMsg(msgInfo types.MsgInfo) (msg sdk.Msg) {
-	coin := sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))
+func MakeTransferMsg(msgInfo MsgInfo) (msg sdk.Msg) {
+	coin := sdk.NewCoin(msgInfo.Denom, msgInfo.Amount)
 	msg = &ibctypes.MsgTransfer{
 		SourcePort:       "transfer",
 		SourceChannel:    msgInfo.Channel,

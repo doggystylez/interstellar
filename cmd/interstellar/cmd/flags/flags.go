@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/doggystylez/interstellar/types"
+	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/types"
 	"github.com/spf13/cobra"
 )
 

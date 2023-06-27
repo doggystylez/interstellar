@@ -2,10 +2,10 @@ package txcli
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/doggystylez/interstellar/client/cosmos/query"
-	"github.com/doggystylez/interstellar/client/cosmos/tx"
+	"cosmossdk.io/math"
+	"github.com/doggystylez/interstellar/client/query"
+	"github.com/doggystylez/interstellar/client/tx"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +25,10 @@ func transferCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			if err != nil {
+				panic(err)
+			}
 			config.Rpc, err = flags.ProcessQueryFlags(cmd)
 			if err != nil {
 				panic(err)
@@ -33,8 +37,9 @@ func transferCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			msgInfo.Amount, err = strconv.ParseUint(args[1], 10, 64)
-			if err != nil {
+			var ok bool
+			msgInfo.Amount, ok = math.NewIntFromString(args[1])
+			if !ok {
 				panic(err)
 			}
 			msgInfo.Channel, err = cmd.Flags().GetString("channel-id")
@@ -42,7 +47,7 @@ func transferCmd() (cmd *cobra.Command) {
 				panic(err)
 			}
 			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[2]
-			resp, err = tx.AssembleAndBroadcast(msgInfo, config, tx.MakeTransferMsg)
+			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Path, config.Rpc, tx.MakeTransferMsg)
 			if err != nil {
 				panic(err)
 			}
@@ -67,6 +72,10 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			if err != nil {
+				panic(err)
+			}
 			config.Rpc, err = flags.ProcessQueryFlags(cmd)
 			if err != nil {
 				panic(err)
@@ -79,17 +88,14 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			amount, err := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
-			if err != nil {
-				panic(err)
-			}
+			amount := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
 			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[1]
 			if config.TxInfo.FeeDenom == msgInfo.Denom {
-				msgInfo.Amount = amount.Balance.Amount.Uint64() - config.TxInfo.FeeAmount
+				msgInfo.Amount = math.NewIntFromUint64(amount.Amount - config.TxInfo.FeeAmount)
 			} else {
-				msgInfo.Amount = amount.Balance.Amount.Uint64()
+				msgInfo.Amount = math.NewIntFromUint64(amount.Amount)
 			}
-			resp, err = tx.AssembleAndBroadcast(msgInfo, config, tx.MakeTransferMsg)
+			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Path, config.Rpc, tx.MakeTransferMsg)
 			if err != nil {
 				panic(err)
 			}

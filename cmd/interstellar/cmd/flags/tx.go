@@ -1,11 +1,11 @@
 package flags
 
 import (
-	"github.com/doggystylez/interstellar/types"
+	"github.com/doggystylez/interstellar/client/tx"
 	"github.com/spf13/cobra"
 )
 
-func ProcessTxFlags(cmd *cobra.Command) (txInfo types.TxInfo, err error) {
+func ProcessTxFlags(cmd *cobra.Command) (txInfo tx.TxInfo, err error) {
 	txInfo.FeeAmount, err = cmd.Flags().GetUint64("fee-amount")
 	if err != nil {
 		return

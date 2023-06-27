@@ -1,14 +1,14 @@
 package txcli
 
 import (
+	"github.com/doggystylez/interstellar/client/tx"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
-	"github.com/doggystylez/interstellar/types"
 	"github.com/spf13/cobra"
 )
 
 var (
-	msgInfo types.MsgInfo
-	resp    types.TxResponse
+	msgInfo tx.MsgInfo
+	resp    tx.TxResponse
 )
 
 func TxCmd() (txCmd *cobra.Command) {

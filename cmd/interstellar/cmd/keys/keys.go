@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/doggystylez/interstellar/client/keys"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
-	"github.com/doggystylez/interstellar/keys/keyring"
-	"github.com/doggystylez/interstellar/keys/mnemonic"
 	"github.com/spf13/cobra"
 )
 
@@ -39,11 +37,15 @@ func newCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			mnemonic, bytes, err := mnemonic.NewKeyWithSeed(config.TxInfo.KeyInfo.KeyRing)
+			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path) {
+				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists")
+				return
+			}
+			mnemonic, bytes, err := keys.NewKeyWithSeed(config.TxInfo.KeyInfo.KeyRing)
 			if err != nil {
 				panic(err)
 			}
-			err = keyring.Save(config, bytes)
+			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes)
 			if err != nil {
 				panic(err)
 			}
@@ -68,17 +70,25 @@ func restoreCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing.Mnemonic, err = input.GetString("enter your mnemonic", bufio.NewReader(os.Stdin))
+			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path) {
+				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists")
+				return
+			}
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print("enter your mnemonic")
+			config.TxInfo.KeyInfo.KeyRing.Mnemonic, err = reader.ReadString('\n')
 			if err != nil {
 				panic(err)
 			}
-			bytes, err := mnemonic.KeyFromSeed(config.TxInfo.KeyInfo.KeyRing)
+			bytes, err := keys.KeyFromSeed(config.TxInfo.KeyInfo.KeyRing)
 			if err != nil {
 				panic(err)
 			}
-			err = keyring.Save(config, bytes)
+			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes)
 			if err != nil {
 				panic(err)
+			} else {
+				fmt.Println("saved key to keyring")
 			}
 		},
 	}

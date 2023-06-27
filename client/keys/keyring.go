@@ -1,43 +1,46 @@
-package keyring
+package keys
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/99designs/keyring"
-	"github.com/doggystylez/interstellar/types"
 )
 
-func Save(config types.InterstellarConfig, keyBytes []byte) (err error) {
+func Exists(keyName string, path string) bool {
+	if _, err := os.Stat(path + "/" + keyName); !os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
+func Save(keyName string, path string, keyBytes []byte) (err error) {
 	ring, err := keyring.Open(keyring.Config{
 		ServiceName:      "interstellar",
 		AllowedBackends:  []keyring.BackendType{keyring.FileBackend},
-		FileDir:          config.Path,
+		FileDir:          path,
 		FilePasswordFunc: keyring.TerminalPrompt,
 	})
 	if err != nil {
 		return
 	}
 	err = ring.Set(keyring.Item{
-		Key:  config.TxInfo.KeyInfo.KeyRing.KeyName,
+		Key:  keyName,
 		Data: keyBytes,
 	})
-	if err == nil {
-		fmt.Println("saved key to keyring")
-	}
 	return
 }
 
-func Load(config types.InterstellarConfig) (keyBytes []byte, err error) {
+func Load(keyName string, path string) (keyBytes []byte, err error) {
 	ring, err := keyring.Open(keyring.Config{
 		ServiceName:      "interstellar",
 		AllowedBackends:  []keyring.BackendType{keyring.FileBackend},
-		FileDir:          config.Path,
+		FileDir:          path,
 		FilePasswordFunc: keyring.TerminalPrompt,
 	})
 	if err != nil {
 		return
 	}
-	key, err := ring.Get(config.TxInfo.KeyInfo.KeyRing.KeyName)
+	key, err := ring.Get(keyName)
 	if err != nil {
 		return
 	}

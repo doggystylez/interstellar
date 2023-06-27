@@ -1,4 +1,4 @@
-package hexkey
+package keys
 
 import (
 	"encoding/hex"

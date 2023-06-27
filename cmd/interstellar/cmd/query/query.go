@@ -3,9 +3,8 @@ package querycli
 import (
 	"fmt"
 
-	"github.com/doggystylez/interstellar/client/cosmos/query"
+	"github.com/doggystylez/interstellar/client/query"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
-	"github.com/doggystylez/interstellar/types"
 	"github.com/spf13/cobra"
 )
 
@@ -33,10 +32,7 @@ func chainCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			chainId, err := query.GetChainId(rpc)
-			if err != nil {
-				panic(err)
-			}
+			chainId := query.GetChainId(rpc)
 			fmt.Println(query.Jsonify(chainId))
 		},
 	}
@@ -70,10 +66,7 @@ func accountCmd() (cmd *cobra.Command) {
 					panic(err)
 				}
 			}
-			account, err := query.GetAccountInfoFromAddress(config)
-			if err != nil {
-				panic(err)
-			}
+			account := query.GetAccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
 			fmt.Println(query.Jsonify(account))
 		},
 	}
@@ -103,7 +96,7 @@ func addressCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println(query.Jsonify(types.AddressRes{Address: config.TxInfo.Address}))
+			fmt.Println(query.Jsonify(query.AddressRes{Address: config.TxInfo.Address}))
 		},
 	}
 	return
@@ -144,18 +137,12 @@ func balanceCmd() (cmd *cobra.Command) {
 				return
 			}
 			if denom == "" {
-				resp, err := query.GetAllBalances(config.TxInfo.Address, config.Rpc)
-				if err != nil {
-					panic(err)
-				}
+				resp := query.GetAllBalances(config.TxInfo.Address, config.Rpc)
 				balances = resp.Balances
 
 			} else {
-				resp, err := query.GetBalanceByDenom(config.TxInfo.Address, denom, config.Rpc)
-				if err != nil {
-					panic(err)
-				}
-				balances = resp.Balance
+				resp := query.GetBalanceByDenom(config.TxInfo.Address, denom, config.Rpc)
+				balances = resp
 			}
 			fmt.Println(query.Jsonify(balances))
 		},

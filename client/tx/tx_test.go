@@ -6,13 +6,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/doggystylez/interstellar/grpc"
-	"github.com/doggystylez/interstellar/types"
+	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/client/keys"
 )
 
 const (
 	testGrpc     = "grpc.osmosis.zone:9090"
 	testSendHash = "FBDDF36C9F121E089AE2039417254404CB4538CA608AEDFAADE6D1D2180DF1DC"
+	// hexKey = "dd4901ac8d8b6568d2469ec93420e8f84bb896c2692e57f6957b27646f040295"
 )
 
 const (
@@ -20,22 +21,18 @@ const (
 )
 
 var (
-	testConfig = types.InterstellarConfig{
-		TxInfo: testTxInfo,
-	}
-
-	testSigningInfo = types.SigningInfo{
+	testSigningInfo = SigningInfo{
 		ChainId: "osmosis-1",
 		AccNum:  849140,
 		SeqNum:  10,
-		KeyRing: types.KeyRing{
-			KeyName: "test",
-			Backend: "test",
-			HexPriv: "dd4901ac8d8b6568d2469ec93420e8f84bb896c2692e57f6957b27646f040295",
+		KeyRing: keys.KeyRing{
+			KeyName:  "test",
+			Backend:  "test",
+			KeyBytes: []byte{221, 73, 1, 172, 141, 139, 101, 104, 210, 70, 158, 201, 52, 32, 232, 248, 75, 184, 150, 194, 105, 46, 87, 246, 149, 123, 39, 100, 111, 4, 2, 149},
 		},
 	}
 
-	testTxInfo = types.TxInfo{
+	testTxInfo = TxInfo{
 		Address:   testAddress,
 		FeeAmount: 900,
 		FeeDenom:  "uosmo",
@@ -54,7 +51,7 @@ var (
 		},
 	}
 
-	testClient = types.Client{
+	testClient = grpc.Client{
 		Endpoint: testGrpc,
 		Timeout:  7,
 	}
@@ -63,7 +60,7 @@ var (
 )
 
 func TestSignFromPrivKey(t *testing.T) {
-	txBytes, err := SignFromPrivkey([]sdk.Msg{testSendMsg}, testConfig)
+	txBytes, err := SignFromPrivkey([]sdk.Msg{testSendMsg}, testTxInfo)
 	if err != nil {
 		t.Errorf("SignFromPrivkey failed with error %v", err)
 	}
@@ -73,11 +70,11 @@ func TestSignFromPrivKey(t *testing.T) {
 }
 
 func TestBroadcast(t *testing.T) {
-	err := grpc.Open(&testClient)
+	err := testClient.Open()
 	if err != nil {
 		panic(err)
 	}
-	defer grpc.Close(&testClient)
+	defer testClient.Close()
 	resp, err := broadcastTx(testBytes, testClient)
 	if err != nil {
 		t.Errorf("BroadcastTx failed with error %v", err)

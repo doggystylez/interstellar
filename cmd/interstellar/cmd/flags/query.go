@@ -1,11 +1,11 @@
 package flags
 
 import (
-	"github.com/doggystylez/interstellar/types"
+	"github.com/doggystylez/interstellar/client/grpc"
 	"github.com/spf13/cobra"
 )
 
-func ProcessQueryFlags(cmd *cobra.Command) (rpc types.Client, err error) {
+func ProcessQueryFlags(cmd *cobra.Command) (rpc grpc.Client, err error) {
 	rpc.Endpoint, err = cmd.Flags().GetString("node")
 	if err != nil {
 		return

@@ -4,21 +4,25 @@ import (
 	"context"
 	"time"
 
-	"github.com/doggystylez/interstellar/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func Open(c *types.Client) (err error) {
+func New(endpoint string, timeout int) Client {
+	return Client{Endpoint: endpoint, Timeout: timeout, Ctx: context.Background()}
+}
+
+func (c *Client) Open() error {
+	var err error
 	c.Ctx, c.CtxCancel = context.WithTimeout(context.Background(), time.Duration(c.Timeout)*time.Second)
 	c.Conn, err = grpc.Dial(
 		c.Endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	return
+	return err
 }
 
-func Close(c *types.Client) {
+func (c *Client) Close() {
 	c.CtxCancel()
 	if err := c.Conn.Close(); err != nil {
 		panic(err)

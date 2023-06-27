@@ -5,12 +5,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/doggystylez/interstellar/keys/hexkey"
-	"github.com/doggystylez/interstellar/types"
+	"github.com/doggystylez/interstellar/client/keys"
 )
 
-func SignFromPrivkey(msg []sdk.Msg, config types.InterstellarConfig) (txBytes []byte, err error) {
-	txConfig, err := buildTx(msg, config.TxInfo)
+func SignFromPrivkey(msg []sdk.Msg, txInfo TxInfo) (txBytes []byte, err error) {
+	txConfig, err := buildTx(msg, txInfo)
 	if err != nil {
 		return
 	}
@@ -18,27 +17,24 @@ func SignFromPrivkey(msg []sdk.Msg, config types.InterstellarConfig) (txBytes []
 		SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
 		Signature: nil,
 	}
-	priv, err := hexkey.PrivKeyfromString(config.TxInfo.KeyInfo.KeyRing.HexPriv)
-	if err != nil {
-		return
-	}
+	priv := keys.FromBytes(txInfo.KeyInfo.KeyRing.KeyBytes)
 	sig := signing.SignatureV2{
 		PubKey:   priv.PubKey(),
 		Data:     &sigData,
-		Sequence: config.TxInfo.KeyInfo.SeqNum,
+		Sequence: txInfo.KeyInfo.SeqNum,
 	}
 	err = txConfig.TxBuilder.SetSignatures(sig)
 	if err != nil {
 		return
 	}
 	signingData := authsigning.SignerData{
-		Address:       config.TxInfo.Address,
-		ChainID:       config.TxInfo.KeyInfo.ChainId,
-		AccountNumber: config.TxInfo.KeyInfo.AccNum,
+		Address:       txInfo.Address,
+		ChainID:       txInfo.KeyInfo.ChainId,
+		AccountNumber: txInfo.KeyInfo.AccNum,
 	}
 	sig, err = txclient.SignWithPrivKey(
 		txConfig.TxConfig.SignModeHandler().DefaultMode(), signingData,
-		txConfig.TxBuilder, priv, txConfig.TxConfig, config.TxInfo.KeyInfo.SeqNum)
+		txConfig.TxBuilder, priv, txConfig.TxConfig, txInfo.KeyInfo.SeqNum)
 	if err != nil {
 		return
 	}

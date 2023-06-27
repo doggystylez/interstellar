@@ -1,28 +1,34 @@
 package flags
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 
-	"github.com/doggystylez/interstellar/types"
+	"github.com/doggystylez/interstellar/client/keys"
 	"github.com/spf13/cobra"
 )
 
-func ProcessKeyFlags(cmd *cobra.Command) (keyRing types.KeyRing, err error) {
-	keyRing.HexPriv, err = cmd.Flags().GetString("priv")
-	if err != nil {
-		return
-	}
+func ProcessKeyFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error) {
 	keyRing.KeyName, err = cmd.Flags().GetString("key")
 	if err != nil {
 		return
 	}
-	if keyRing.KeyName == "" && keyRing.HexPriv == "" {
-		fmt.Println("address, key name, or private key required")
-		os.Exit(1)
+	hexPriv, err := cmd.Flags().GetString("priv")
+	if err != nil {
+		return
 	}
-	if keyRing.KeyName != "" && keyRing.HexPriv != "" {
-		fmt.Println("cannot use both key name and private key")
+	if hexPriv != "" {
+		if keyRing.KeyName != "" {
+			fmt.Println("cannot use both key name and private key")
+			os.Exit(1)
+		}
+		keyRing.KeyBytes, err = hex.DecodeString(hexPriv)
+		if err != nil {
+			return
+		}
+	} else if keyRing.KeyName == "" {
+		fmt.Println("address, key name, or private key required")
 		os.Exit(1)
 	}
 	keyRing.Backend, err = cmd.Flags().GetString("keyring-backend")
