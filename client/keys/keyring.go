@@ -6,7 +6,7 @@ import (
 	"github.com/99designs/keyring"
 )
 
-func Exists(keyName string, path string) bool {
+func Exists(keyName, path string) bool {
 	if _, err := os.Stat(path + "/" + keyName); !os.IsNotExist(err) {
 		return true
 	}
@@ -30,12 +30,18 @@ func Save(keyName string, path string, keyBytes []byte) (err error) {
 	return
 }
 
-func Load(keyName string, path string) (keyBytes []byte, err error) {
+func Load(keyName, path, password string) (keyBytes []byte, err error) {
+	var passFunc keyring.PromptFunc
+	if password == "" {
+		passFunc = keyring.TerminalPrompt
+	} else {
+		passFunc = keyring.FixedStringPrompt(password)
+	}
 	ring, err := keyring.Open(keyring.Config{
 		ServiceName:      "interstellar",
 		AllowedBackends:  []keyring.BackendType{keyring.FileBackend},
 		FileDir:          path,
-		FilePasswordFunc: keyring.TerminalPrompt,
+		FilePasswordFunc: passFunc,
 	})
 	if err != nil {
 		return
