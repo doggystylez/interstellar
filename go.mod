@@ -2,8 +2,6 @@ module github.com/doggystylez/interstellar
 
 go 1.20
 
-replace github.com/doggystylez/interstellar-proto => ../interstellar-proto
-
 replace (
 	github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.45.1-0.20230603004404-93d9d4851b92
 	github.com/cosmos/iavl v0.19.5 => github.com/cosmos/iavl v0.19.4
@@ -17,7 +15,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.47.3
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v4 v4.4.2
-	github.com/doggystylez/interstellar-proto v0.0.0-00010101000000-000000000000
+	github.com/doggystylez/interstellar-proto v0.0.0-20230627235510-2ee3ef9277a1
 	github.com/osmosis-labs/osmosis/v15 v15.1.2
 	github.com/spf13/cobra v1.7.0
 	google.golang.org/grpc v1.56.1
