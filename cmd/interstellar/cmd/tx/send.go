@@ -2,8 +2,8 @@ package txcli
 
 import (
 	"fmt"
+	"strconv"
 
-	"cosmossdk.io/math"
 	"github.com/doggystylez/interstellar/client/query"
 	"github.com/doggystylez/interstellar/client/tx"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
@@ -37,9 +37,8 @@ func sendCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			var ok bool
-			msgInfo.Amount, ok = math.NewIntFromString(args[1])
-			if !ok {
+			msgInfo.Amount, err = strconv.ParseUint(args[1], 10, 64)
+			if err != nil {
 				panic(err)
 			}
 			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[2]
@@ -83,9 +82,9 @@ func sendAllCmd() (cmd *cobra.Command) {
 			amount := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
 			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[1]
 			if config.TxInfo.FeeDenom == msgInfo.Denom {
-				msgInfo.Amount = math.NewIntFromUint64(amount.Amount - config.TxInfo.FeeAmount)
+				msgInfo.Amount = amount.Amount - config.TxInfo.FeeAmount
 			} else {
-				msgInfo.Amount = math.NewIntFromUint64(amount.Amount)
+				msgInfo.Amount = amount.Amount
 			}
 			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Path, config.Rpc, tx.MakeSendMsg)
 			if err != nil {
