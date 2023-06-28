@@ -5,13 +5,13 @@ import (
 	"github.com/cosmos/go-bip39"
 )
 
-func KeyFromSeed(key KeyRing) (bytes []byte, err error) {
+func KeyFromSeed(mnemonic string) (bytes []byte, err error) {
 	algo := hd.Secp256k1
-	bytes, err = algo.Derive()(key.Mnemonic, "", "m/44'/118'/0'/0/0")
+	bytes, err = algo.Derive()(mnemonic, "", "m/44'/118'/0'/0/0")
 	return
 }
 
-func NewKeyWithSeed(key KeyRing) (mnemonic string, bytes []byte, err error) {
+func NewKeyWithSeed() (mnemonic string, bytes []byte, err error) {
 	entropy, err := bip39.NewEntropy(256)
 	if err != nil {
 		return
@@ -20,6 +20,6 @@ func NewKeyWithSeed(key KeyRing) (mnemonic string, bytes []byte, err error) {
 	if err != nil {
 		return
 	}
-	bytes, err = KeyFromSeed(KeyRing{Mnemonic: mnemonic})
+	bytes, err = KeyFromSeed(mnemonic)
 	return
 }

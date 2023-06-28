@@ -2,9 +2,8 @@ package keys
 
 type (
 	KeyRing struct {
-		KeyName string
-		Backend string
-		//	HexPriv  string
+		KeyName  string
+		Backend  string
 		Mnemonic string
 		KeyBytes []byte
 	}
