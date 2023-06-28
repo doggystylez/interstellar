@@ -47,7 +47,7 @@ func transferCmd() (cmd *cobra.Command) {
 				panic(err)
 			}
 			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[2]
-			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Path, config.Rpc, tx.MakeTransferMsg)
+			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Rpc, tx.MakeTransferMsg)
 			if err != nil {
 				panic(err)
 			}
@@ -95,7 +95,7 @@ func transferAllCmd() (cmd *cobra.Command) {
 			} else {
 				msgInfo.Amount = math.NewIntFromUint64(amount.Amount)
 			}
-			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Path, config.Rpc, tx.MakeTransferMsg)
+			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Rpc, tx.MakeTransferMsg)
 			if err != nil {
 				panic(err)
 			}
