@@ -41,7 +41,7 @@ func newCmd() (cmd *cobra.Command) {
 				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists")
 				return
 			}
-			mnemonic, bytes, err := keys.NewKeyWithSeed(config.TxInfo.KeyInfo.KeyRing)
+			mnemonic, bytes, err := keys.NewKeyWithSeed()
 			if err != nil {
 				panic(err)
 			}
@@ -80,7 +80,7 @@ func restoreCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			bytes, err := keys.KeyFromSeed(config.TxInfo.KeyInfo.KeyRing)
+			bytes, err := keys.KeyFromSeed(config.TxInfo.KeyInfo.KeyRing.Mnemonic)
 			if err != nil {
 				panic(err)
 			}
