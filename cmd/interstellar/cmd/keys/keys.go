@@ -45,7 +45,7 @@ func newCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes)
+			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes, "")
 			if err != nil {
 				panic(err)
 			}
@@ -84,7 +84,7 @@ func restoreCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes)
+			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes, "")
 			if err != nil {
 				panic(err)
 			} else {
