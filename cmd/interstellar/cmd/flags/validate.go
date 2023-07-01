@@ -1,8 +1,6 @@
 package flags
 
 import (
-	"github.com/cosmos/btcutil/bech32"
-	"github.com/doggystylez/interstellar/client/grpc"
 	"github.com/doggystylez/interstellar/client/keys"
 	"github.com/doggystylez/interstellar/client/query"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/types"
@@ -33,7 +31,7 @@ func LoadKey(config *types.InterstellarConfig) (err error) {
 
 func CheckAddress(config *types.InterstellarConfig) (err error) {
 	if config.TxInfo.Address == "" {
-		config.TxInfo.Address, err = privKeyToAddress(config.TxInfo.KeyInfo.KeyRing.KeyBytes, config.Rpc)
+		config.TxInfo.Address, err = keys.BechAddress(query.GetAddressPrefix(config.Rpc), config.TxInfo.KeyInfo.KeyRing.KeyBytes)
 	}
 	return
 }
@@ -48,12 +46,5 @@ func CheckSigningInfo(config *types.InterstellarConfig) (err error) {
 		chainId := query.GetChainId(config.Rpc)
 		config.TxInfo.KeyInfo.ChainId = chainId.ChainId
 	}
-	return
-}
-
-func privKeyToAddress(keyBytes []byte, rpc grpc.Client) (address string, err error) {
-	prefix := query.GetAddressPrefix(rpc)
-	privKey := keys.FromBytes(keyBytes)
-	address, err = bech32.EncodeFromBase256(prefix, privKey.PubKey().Address())
 	return
 }
