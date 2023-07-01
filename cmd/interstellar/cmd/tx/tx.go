@@ -6,10 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	msgInfo tx.MsgInfo
-	resp    tx.TxResponse
-)
+var msgInfo tx.MsgInfo
 
 func TxCmd() (txCmd *cobra.Command) {
 	txCmd = &cobra.Command{

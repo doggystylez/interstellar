@@ -33,7 +33,7 @@ func chainCmd() (cmd *cobra.Command) {
 				panic(err)
 			}
 			chainId := query.GetChainId(rpc)
-			fmt.Println(query.Jsonify(chainId))
+			fmt.Println(query.Jsonify(chainId)) //nolint
 		},
 	}
 	return
@@ -67,7 +67,7 @@ func accountCmd() (cmd *cobra.Command) {
 				}
 			}
 			account := query.GetAccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
-			fmt.Println(query.Jsonify(account))
+			fmt.Println(query.Jsonify(account)) //nolint
 		},
 	}
 	return
@@ -96,7 +96,7 @@ func addressCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println(query.Jsonify(query.AddressRes{Address: config.TxInfo.Address}))
+			fmt.Println(query.Jsonify(query.AddressRes{Address: config.TxInfo.Address})) //nolint
 		},
 	}
 	return
@@ -144,7 +144,7 @@ func balanceCmd() (cmd *cobra.Command) {
 				resp := query.GetBalanceByDenom(config.TxInfo.Address, denom, config.Rpc)
 				balances = resp
 			}
-			fmt.Println(query.Jsonify(balances))
+			fmt.Println(query.Jsonify(balances)) //nolint
 		},
 	}
 	cmd.Flags().StringP("denom", "d", "", "denom")

@@ -38,7 +38,7 @@ func newCmd() (cmd *cobra.Command) {
 				panic(err)
 			}
 			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path) {
-				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists")
+				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists") //nolint
 				return
 			}
 			mnemonic, bytes, err := keys.NewKeyWithSeed()
@@ -49,7 +49,7 @@ func newCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println("your new seed phrase is:", mnemonic)
+			fmt.Println("your new seed phrase is:", mnemonic) //nolint
 		},
 	}
 	return
@@ -71,11 +71,11 @@ func restoreCmd() (cmd *cobra.Command) {
 				panic(err)
 			}
 			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path) {
-				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists")
+				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists") //nolint
 				return
 			}
 			reader := bufio.NewReader(os.Stdin)
-			fmt.Print("enter your mnemonic")
+			fmt.Print("enter your mnemonic") //nolint
 			config.TxInfo.KeyInfo.KeyRing.Mnemonic, err = reader.ReadString('\n')
 			if err != nil {
 				panic(err)
@@ -88,7 +88,7 @@ func restoreCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			} else {
-				fmt.Println("saved key to keyring")
+				fmt.Println("saved key to keyring") //nolint
 			}
 		},
 	}

@@ -20,7 +20,7 @@ func ProcessKeyFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error) {
 	}
 	if hexPriv != "" {
 		if keyRing.KeyName != "" {
-			fmt.Println("cannot use both key name and private key")
+			fmt.Println("cannot use both key name and private key") //nolint
 			os.Exit(1)
 		}
 		keyRing.KeyBytes, err = hex.DecodeString(hexPriv)
@@ -28,7 +28,7 @@ func ProcessKeyFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error) {
 			return
 		}
 	} else if keyRing.KeyName == "" {
-		fmt.Println("address, key name, or private key required")
+		fmt.Println("address, key name, or private key required") //nolint
 		os.Exit(1)
 	}
 	keyRing.Backend, err = cmd.Flags().GetString("keyring-backend")

@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -16,7 +15,7 @@ type (
 	MsgInfo struct {
 		From    string
 		To      string
-		Amount  math.Int
+		Amount  uint64
 		Denom   string
 		Channel string
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 func MakeSendMsg(msgInfo MsgInfo) (msg sdk.Msg) {
-	coin := sdk.NewCoin(msgInfo.Denom, msgInfo.Amount)
+	coin := sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))
 	msg = &banktypes.MsgSend{
 		FromAddress: msgInfo.From,
 		ToAddress:   msgInfo.To,
@@ -19,7 +19,7 @@ func MakeSendMsg(msgInfo MsgInfo) (msg sdk.Msg) {
 }
 
 func MakeTransferMsg(msgInfo MsgInfo) (msg sdk.Msg) {
-	coin := sdk.NewCoin(msgInfo.Denom, msgInfo.Amount)
+	coin := sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))
 	msg = &ibctypes.MsgTransfer{
 		SourcePort:       "transfer",
 		SourceChannel:    msgInfo.Channel,

@@ -7,10 +7,6 @@ import (
 )
 
 func CheckTxInfo(config *types.InterstellarConfig) (err error) {
-	err = LoadKey(config)
-	if err != nil {
-		return
-	}
 	err = CheckAddress(config)
 	if err != nil {
 		return
@@ -31,6 +27,10 @@ func LoadKey(config *types.InterstellarConfig) (err error) {
 
 func CheckAddress(config *types.InterstellarConfig) (err error) {
 	if config.TxInfo.Address == "" {
+		err = LoadKey(config)
+		if err != nil {
+			return
+		}
 		config.TxInfo.Address, err = keys.BechAddress(query.GetAddressPrefix(config.Rpc), config.TxInfo.KeyInfo.KeyRing.KeyBytes)
 	}
 	return

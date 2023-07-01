@@ -28,7 +28,6 @@ func SignFromPrivkey(msg []sdk.Msg, txInfo TxInfo) (txBytes []byte, err error) {
 		return
 	}
 	signingData := authsigning.SignerData{
-		Address:       txInfo.Address,
 		ChainID:       txInfo.KeyInfo.ChainId,
 		AccountNumber: txInfo.KeyInfo.AccNum,
 	}
@@ -46,5 +45,17 @@ func SignFromPrivkey(msg []sdk.Msg, txInfo TxInfo) (txBytes []byte, err error) {
 	if err != nil {
 		return
 	}
+	return
+}
+
+func buildTx(msgs []sdk.Msg, txInfo TxInfo) (txConfig TxConfig, err error) {
+	txConfig = NewTxConfig()
+	if txInfo.FeeDenom != "" {
+		feeCoin := sdk.NewCoin(txInfo.FeeDenom, sdk.NewIntFromUint64(txInfo.FeeAmount))
+		txConfig.TxBuilder.SetFeeAmount(sdk.Coins{feeCoin})
+	}
+	txConfig.TxBuilder.SetGasLimit(txInfo.Gas)
+	txConfig.TxBuilder.SetMemo(txInfo.Memo)
+	err = txConfig.TxBuilder.SetMsgs(msgs...)
 	return
 }

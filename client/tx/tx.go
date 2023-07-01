@@ -1,7 +1,6 @@
 package tx
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/doggystylez/interstellar/client/grpc"
 )
@@ -12,18 +11,6 @@ func AssembleAndBroadcast(msgInfo MsgInfo, txInfo TxInfo, rpc grpc.Client, maker
 		return
 	}
 	res, err = broadcastTx(txBytes, rpc)
-	return
-}
-
-func buildTx(msgs []sdk.Msg, txInfo TxInfo) (txConfig TxConfig, err error) {
-	txConfig = NewTxConfig()
-	if txInfo.FeeDenom != "" {
-		feeCoin := sdk.NewCoin(txInfo.FeeDenom, sdk.NewIntFromUint64(txInfo.FeeAmount))
-		txConfig.TxBuilder.SetFeeAmount(sdk.Coins{feeCoin})
-	}
-	txConfig.TxBuilder.SetGasLimit(txInfo.Gas)
-	txConfig.TxBuilder.SetMemo(txInfo.Memo)
-	err = txConfig.TxBuilder.SetMsgs(msgs...)
 	return
 }
 
