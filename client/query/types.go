@@ -23,4 +23,13 @@ type (
 		Denom  string `json:"denom"`
 		Amount uint64 `json:"amount"`
 	}
+
+	ContractRes struct {
+		Models []Model `json:"models"`
+	}
+
+	Model struct {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	}
 )

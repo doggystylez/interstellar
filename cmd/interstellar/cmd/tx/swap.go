@@ -44,7 +44,6 @@ func swapCmd() (cmd *cobra.Command) {
 				panic(err)
 			}
 			msgInfo.From, msgInfo.Denom = config.TxInfo.Address, args[1]
-
 			slippage, err := cmd.Flags().GetString("slippage")
 			if err != nil {
 				panic(err)

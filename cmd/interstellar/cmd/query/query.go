@@ -32,7 +32,10 @@ func chainCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			chainId := query.GetChainId(rpc)
+			chainId, err := query.GetChainId(rpc)
+			if err != nil {
+				panic(err)
+			}
 			fmt.Println(query.Jsonify(chainId)) //nolint
 		},
 	}
@@ -66,7 +69,10 @@ func accountCmd() (cmd *cobra.Command) {
 					panic(err)
 				}
 			}
-			account := query.GetAccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
+			account, err := query.GetAccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
+			if err != nil {
+				panic(err)
+			}
 			fmt.Println(query.Jsonify(account)) //nolint
 		},
 	}
@@ -137,11 +143,17 @@ func balanceCmd() (cmd *cobra.Command) {
 				return
 			}
 			if denom == "" {
-				resp := query.GetAllBalances(config.TxInfo.Address, config.Rpc)
+				resp, err := query.GetAllBalances(config.TxInfo.Address, config.Rpc)
+				if err != nil {
+					panic(err)
+				}
 				balances = resp.Balances
 
 			} else {
-				resp := query.GetBalanceByDenom(config.TxInfo.Address, denom, config.Rpc)
+				resp, err := query.GetBalanceByDenom(config.TxInfo.Address, denom, config.Rpc)
+				if err != nil {
+					panic(err)
+				}
 				balances = resp
 			}
 			fmt.Println(query.Jsonify(balances)) //nolint

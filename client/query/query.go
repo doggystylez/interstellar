@@ -9,11 +9,12 @@ import (
 	"github.com/doggystylez/interstellar-proto/account"
 	"github.com/doggystylez/interstellar-proto/balance"
 	"github.com/doggystylez/interstellar-proto/base"
+	"github.com/doggystylez/interstellar-proto/wasm"
 	"github.com/doggystylez/interstellar/client/grpc"
 	"google.golang.org/protobuf/proto"
 )
 
-func GetChainId(g grpc.Client) (chain ChainIdRes) {
+func GetChainId(g grpc.Client) (ChainIdRes, error) {
 	err := g.Open()
 	if err != nil {
 		panic(err)
@@ -23,13 +24,13 @@ func GetChainId(g grpc.Client) (chain ChainIdRes) {
 	client := base.NewServiceClient(g.Conn)
 	res, err := client.GetNodeInfo(g.Ctx, &base.GetNodeInfoRequest{})
 	if err != nil {
-		panic(err)
+		return ChainIdRes{}, err
+	} else {
+		return ChainIdRes{ChainId: res.DefaultNodeInfo.GetNetwork()}, nil
 	}
-	chain.ChainId = res.DefaultNodeInfo.Network
-	return
 }
 
-func GetAddressPrefix(g grpc.Client) (prefix string) {
+func GetAddressPrefix(g grpc.Client) (string, error) {
 	err := g.Open()
 	if err != nil {
 		panic(err)
@@ -38,26 +39,25 @@ func GetAddressPrefix(g grpc.Client) (prefix string) {
 	client := account.NewQueryClient(g.Conn)
 	res, err := client.Accounts(g.Ctx, &account.QueryAccountsRequest{Pagination: &query.PageRequest{Limit: 1}})
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	acct := &account.BaseAccount{}
 	err = proto.Unmarshal(res.Accounts[0].Value, acct)
 	if err != nil {
 		panic(err)
 	}
-	prefix, err = decodePrefix(acct.Address)
+	return decodePrefix(acct.Address), nil
+}
+
+func decodePrefix(address string) string {
+	prefix, _, err := bech32.DecodeToBase256(address)
 	if err != nil {
 		panic(err)
 	}
-	return
+	return prefix
 }
 
-func decodePrefix(address string) (prefix string, err error) {
-	prefix, _, err = bech32.DecodeToBase256(address)
-	return
-}
-
-func GetAccountInfoFromAddress(address string, g grpc.Client) (a AccountRes) {
+func GetAccountInfoFromAddress(address string, g grpc.Client) (AccountRes, error) {
 	err := g.Open()
 	if err != nil {
 		panic(err)
@@ -66,40 +66,39 @@ func GetAccountInfoFromAddress(address string, g grpc.Client) (a AccountRes) {
 	client := account.NewQueryClient(g.Conn)
 	res, err := client.Account(g.Ctx, &account.QueryAccountRequest{Address: address})
 	if err != nil {
-		panic(err)
+		return AccountRes{}, err
 	}
 	acct := &account.BaseAccount{}
 	err = proto.Unmarshal(res.Account.Value, acct)
 	if err != nil {
 		panic(err)
 	}
-	a.Account, a.Sequence, a.Address = acct.AccountNumber, acct.Sequence, address
-	return
+	return AccountRes{Address: address, Account: acct.AccountNumber, Sequence: acct.Sequence}, nil
 }
 
-func GetAllBalances(address string, g grpc.Client) (b BalanceRes) {
+func GetAllBalances(address string, g grpc.Client) (BalanceRes, error) {
 	err := g.Open()
 	if err != nil {
 		panic(err)
 	}
 	defer g.Close()
-
 	client := balance.NewQueryClient(g.Conn)
 	res, err := client.AllBalances(g.Ctx, &balance.QueryAllBalancesRequest{Address: address})
 	if err != nil {
-		panic(err)
+		return BalanceRes{}, err
 	}
+	var balances BalanceRes
 	for _, coin := range res.Balances {
 		amount, err := strconv.ParseUint(coin.Amount, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		b.Balances = append(b.Balances, Balance{Denom: coin.Denom, Amount: amount})
+		balances.Balances = append(balances.Balances, Balance{Denom: coin.Denom, Amount: amount})
 	}
-	return
+	return balances, nil
 }
 
-func GetBalanceByDenom(address string, denom string, g grpc.Client) (b Balance) {
+func GetBalanceByDenom(address string, denom string, g grpc.Client) (Balance, error) {
 	err := g.Open()
 	if err != nil {
 		panic(err)
@@ -108,13 +107,53 @@ func GetBalanceByDenom(address string, denom string, g grpc.Client) (b Balance) 
 	client := balance.NewQueryClient(g.Conn)
 	res, err := client.Balance(g.Ctx, &balance.QueryBalanceRequest{Address: address, Denom: denom})
 	if err != nil {
-		panic(err)
+		return Balance{}, err
 	}
 	amount, err := strconv.ParseUint(res.Balance.Amount, 10, 64)
 	if err != nil {
 		panic(err)
 	}
-	b.Denom, b.Amount = res.Balance.Denom, amount
+	return Balance{Denom: res.Balance.Denom, Amount: amount}, nil
+}
+
+func GetAllContractData(address string, g grpc.Client) (ContractRes, error) {
+	err := g.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	client := wasm.NewQueryClient(g.Conn)
+	res, err := client.AllContractState(g.Ctx, &wasm.QueryAllContractStateRequest{Address: address, Pagination: &query.PageRequest{Limit: 2000}})
+	if err != nil {
+		return ContractRes{}, err
+	}
+	var data ContractRes
+	for _, model := range res.Models {
+		data.Models = append(data.Models, Model{Key: string(model.Key), Value: string(model.Value)})
+	}
+	return data, nil
+}
+
+func GetContractDataByQuery(address string, query interface{}, queryRes interface{}, g grpc.Client) (err error) {
+	err = g.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	client := wasm.NewQueryClient(g.Conn)
+	data, err := json.Marshal(query)
+	if err != nil {
+		panic(err)
+	}
+	res, err := client.SmartContractState(g.Ctx, &wasm.QuerySmartContractStateRequest{Address: address, QueryData: data})
+	if err != nil {
+		return
+	} else {
+		err = json.Unmarshal(res.Data, &queryRes)
+		if err != nil {
+			panic(err)
+		}
+	}
 	return
 }
 

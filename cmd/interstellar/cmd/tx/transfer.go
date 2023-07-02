@@ -88,7 +88,10 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			amount := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
+			amount, err := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
+			if err != nil {
+				panic(err)
+			}
 			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[1]
 			if config.TxInfo.FeeDenom == msgInfo.Denom {
 				msgInfo.Amount = amount.Amount - config.TxInfo.FeeAmount

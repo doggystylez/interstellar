@@ -5,13 +5,12 @@ import (
 	"github.com/doggystylez/interstellar/client/grpc"
 )
 
-func AssembleAndBroadcast(msgInfo MsgInfo, txInfo TxInfo, rpc grpc.Client, maker MsgMaker) (res TxResponse, err error) {
+func AssembleAndBroadcast(msgInfo MsgInfo, txInfo TxInfo, rpc grpc.Client, maker MsgMaker) (TxResponse, error) {
 	txBytes, err := SignFromPrivkey(msgtoMsgs(maker(msgInfo)), txInfo)
 	if err != nil {
-		return
+		return TxResponse{}, err
 	}
-	res, err = broadcastTx(txBytes, rpc)
-	return
+	return broadcastTx(txBytes, rpc)
 }
 
 func broadcastTx(txBytes []byte, g grpc.Client) (resp TxResponse, err error) {
