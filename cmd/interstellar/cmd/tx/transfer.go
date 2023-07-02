@@ -53,6 +53,7 @@ func transferCmd() (cmd *cobra.Command) {
 			fmt.Println(query.Jsonify(resp)) //nolint
 		},
 	}
+	cmd.Flags().StringP("channel-id", "i", "", "ibc channel")
 	return
 }
 
@@ -101,5 +102,6 @@ func transferAllCmd() (cmd *cobra.Command) {
 			fmt.Println(query.Jsonify(resp)) //nolint
 		},
 	}
+	cmd.Flags().StringP("channel-id", "i", "", "ibc channel")
 	return
 }

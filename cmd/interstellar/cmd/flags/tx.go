@@ -45,7 +45,6 @@ func TxFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
 	for _, cmd := range rawCmds {
 		cmd.Flags().StringP("chain-id", "c", "", "chain-id")
 		cmd.Flags().StringP("from", "f", "", "from address")
-		cmd.Flags().StringP("channel-id", "i", "", "ibc channel")
 		cmd.Flags().Uint64P("account", "u", 0, "account number")
 		cmd.Flags().Uint64P("sequence", "s", 0, "sequence number")
 		cmd.Flags().Uint64P("fee-amount", "a", 0, "fee amount")

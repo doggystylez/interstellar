@@ -13,7 +13,6 @@ import (
 const (
 	testGrpc     = "grpc.osmosis.zone:9090"
 	testSendHash = "FBDDF36C9F121E089AE2039417254404CB4538CA608AEDFAADE6D1D2180DF1DC"
-	// hexKey = "dd4901ac8d8b6568d2469ec93420e8f84bb896c2692e57f6957b27646f040295"
 )
 
 const (

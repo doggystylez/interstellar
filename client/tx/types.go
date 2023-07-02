@@ -13,11 +13,13 @@ import (
 
 type (
 	MsgInfo struct {
-		From    string
-		To      string
-		Amount  uint64
-		Denom   string
-		Channel string
+		From        string
+		To          string
+		Amount      uint64
+		Denom       string
+		Channel     string
+		Contract    string
+		ContractMsg []byte
 	}
 
 	TxInfo struct {
@@ -56,6 +58,30 @@ type (
 	}
 
 	MsgMaker func(MsgInfo) sdk.Msg
+
+	WasmSwap struct {
+		Swap `json:"swap"`
+	}
+
+	Swap struct {
+		InputCoin   `json:"input_coin"`
+		OutputDenom string `json:"output_denom"`
+		Slippage    `json:"slippage"`
+	}
+
+	InputCoin struct {
+		Denom  string `json:"denom"`
+		Amount string `json:"amount"`
+	}
+
+	Slippage struct {
+		Twap `json:"twap"`
+	}
+
+	Twap struct {
+		SlippagePercentage string `json:"slippage_percentage"`
+		WindowSeconds      int    `json:"window_seconds"`
+	}
 )
 
 func NewTxConfig() TxConfig {
