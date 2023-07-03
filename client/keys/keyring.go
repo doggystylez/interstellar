@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/99designs/keyring"
 	"golang.org/x/term"
@@ -17,7 +16,7 @@ func passPrompt(keyName string) keyring.PromptFunc {
 		if err != nil {
 			panic(err)
 		}
-		return strings.TrimSuffix(string(pass), string('\n')), nil
+		return string(pass), nil
 	}
 }
 
