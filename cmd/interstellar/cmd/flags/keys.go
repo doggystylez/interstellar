@@ -18,6 +18,10 @@ func ProccesKeyManageFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error)
 	if err != nil {
 		return
 	}
+	if keyRing.Backend != "file" && keyRing.Backend != "test" {
+		fmt.Println("invalid keyring backend", keyRing.Backend) //nolint
+		os.Exit(1)
+	}
 	return
 }
 
@@ -47,6 +51,10 @@ func ProcessKeySigningFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error
 	if err != nil {
 		return
 	}
+	if keyRing.Backend != "file" && keyRing.Backend != "test" {
+		fmt.Println("invalid keyring backend", keyRing.Backend) //nolint
+		os.Exit(1)
+	}
 	return
 }
 
@@ -57,7 +65,7 @@ func KeyManageFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
 		if err != nil {
 			return
 		}
-		cmd.Flags().StringP("keyring-backend", "b", "test", "keyring backend")
+		cmd.Flags().StringP("keyring-backend", "b", "file", "keyring backend")
 		cmds = append(cmds, cmd)
 	}
 	return
@@ -67,7 +75,7 @@ func KeySigningFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
 	for _, cmd := range rawCmds {
 		cmd.Flags().StringP("priv", "v", "", "private key")
 		cmd.Flags().StringP("key", "k", "", "key name")
-		cmd.Flags().StringP("keyring-backend", "b", "test", "keyring backend")
+		cmd.Flags().StringP("keyring-backend", "b", "file", "keyring backend")
 		cmds = append(cmds, cmd)
 	}
 	return

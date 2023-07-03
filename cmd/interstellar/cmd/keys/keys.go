@@ -39,7 +39,7 @@ func newCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path) {
+			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend) {
 				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists") //nolint
 				return
 			}
@@ -47,7 +47,7 @@ func newCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes, "")
+			err = keys.Save(bytes, config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend, "")
 			if err != nil {
 				panic(err)
 			}
@@ -73,7 +73,7 @@ func restoreCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path) {
+			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend) {
 				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists") //nolint
 				return
 			}
@@ -104,7 +104,7 @@ func restoreCmd() (cmd *cobra.Command) {
 					panic(err)
 				}
 			}
-			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes, "")
+			err = keys.Save(bytes, config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend, "")
 			if err != nil {
 				panic(err)
 			} else {

@@ -13,7 +13,7 @@ func CheckTxInfo(config *types.InterstellarConfig) {
 
 func LoadKey(config *types.InterstellarConfig) (err error) {
 	if len(config.TxInfo.KeyInfo.KeyRing.KeyBytes) == 0 {
-		config.TxInfo.KeyInfo.KeyRing.KeyBytes, err = keys.Load(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, "")
+		config.TxInfo.KeyInfo.KeyRing.KeyBytes, err = keys.Load(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend, "")
 		if err != nil {
 			return
 		}

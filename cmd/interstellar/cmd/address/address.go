@@ -40,11 +40,11 @@ func fetchCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			if !keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path) {
+			if !keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend) {
 				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "does not exist exists") //nolint
 				return
 			}
-			bytes, err := keys.Load(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, "")
+			bytes, err := keys.Load(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend, "")
 			if err != nil {
 				panic(err)
 			}
