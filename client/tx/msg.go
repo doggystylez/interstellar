@@ -33,13 +33,15 @@ func MakeTransferMsg(msgInfo MsgInfo) sdk.Msg {
 }
 
 func MakeWasmMsg(msgInfo MsgInfo) sdk.Msg {
-	coin := sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))
-	return &wasmtypes.MsgExecuteContract{
+	msg := &wasmtypes.MsgExecuteContract{
 		Sender:   msgInfo.From,
 		Contract: msgInfo.Contract,
 		Msg:      msgInfo.ContractMsg,
-		Funds:    sdk.Coins{coin},
 	}
+	if msgInfo.Amount != 0 {
+		msg.Funds = sdk.Coins{sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))}
+	}
+	return msg
 }
 
 func msgtoMsgs(msg sdk.Msg) (msgs []sdk.Msg) {
