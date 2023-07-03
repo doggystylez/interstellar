@@ -13,5 +13,7 @@ type (
 		Ctx       context.Context
 		CtxCancel func()
 		Conn      *grpc.ClientConn
+		Retries   int
+		Interval  int
 	}
 )

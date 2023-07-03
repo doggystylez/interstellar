@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func New(endpoint string, timeout int) Client {
-	return Client{Endpoint: endpoint, Timeout: timeout, Ctx: context.Background()}
+func New(endpoint string, timeout int, retries int, interval int) Client {
+	return Client{Endpoint: endpoint, Timeout: timeout, Ctx: context.Background(), Retries: retries, Interval: interval}
 }
 
 func (c *Client) Open() error {

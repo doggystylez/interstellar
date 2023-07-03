@@ -28,10 +28,7 @@ func chainCmd() (cmd *cobra.Command) {
 		Long:  "Query chain-id",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
-			rpc, err := flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			rpc := flags.ProcessQueryFlags(cmd)
 			chainId, err := query.GetChainId(rpc)
 			if err != nil {
 				panic(err)
@@ -53,10 +50,7 @@ func accountCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			if len(args) == 1 {
 				config.TxInfo.Address = args[0]
 			} else {
@@ -87,10 +81,7 @@ func addressCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 			if err != nil {
 				panic(err)
@@ -116,10 +107,7 @@ func balanceCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			if len(args) == 1 {
 				config.TxInfo.Address = args[0]
 			} else {

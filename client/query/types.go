@@ -32,4 +32,9 @@ type (
 		Key   string `json:"key"`
 		Value string `json:"value"`
 	}
+
+	retryErr struct {
+		retries int
+		err     error
+	}
 )

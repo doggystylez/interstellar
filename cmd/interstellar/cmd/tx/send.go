@@ -29,10 +29,7 @@ func sendCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
 			msgInfo.Amount, err = strconv.ParseUint(args[1], 10, 64)
 			if err != nil {
@@ -68,10 +65,7 @@ func sendAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
 			amount, err := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
 			if err != nil {

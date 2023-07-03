@@ -31,10 +31,7 @@ func swapCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
 			msgInfo.Amount, err = strconv.ParseUint(args[0], 10, 64)
 			if err != nil {

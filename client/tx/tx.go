@@ -1,6 +1,10 @@
 package tx
 
 import (
+	"errors"
+	"strconv"
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/doggystylez/interstellar/client/grpc"
 )
@@ -13,27 +17,31 @@ func AssembleAndBroadcast(msgInfo MsgInfo, txInfo TxInfo, rpc grpc.Client, maker
 	return broadcastTx(txBytes, rpc)
 }
 
-func broadcastTx(txBytes []byte, g grpc.Client) (resp TxResponse, err error) {
-	err = g.Open()
+func broadcastTx(txBytes []byte, g grpc.Client) (TxResponse, error) {
+	var grpcRes *tx.BroadcastTxResponse
+	err := g.Open()
 	if err != nil {
-		return
+		panic(err)
 	}
 	defer g.Close()
 	txClient := tx.NewServiceClient(g.Conn)
-	grpcRes, err := txClient.BroadcastTx(
-		g.Ctx,
-		&tx.BroadcastTxRequest{
-			Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
-			TxBytes: txBytes,
-		},
-	)
-	if err != nil {
-		return
+	for tries := -1; tries < g.Retries; tries++ {
+		grpcRes, err = txClient.BroadcastTx(
+			g.Ctx,
+			&tx.BroadcastTxRequest{
+				Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
+				TxBytes: txBytes,
+			},
+		)
+		if err != nil {
+			time.Sleep(time.Duration(g.Interval) * time.Second)
+		} else {
+			return TxResponse{
+				Code: &grpcRes.TxResponse.Code,
+				Hash: &grpcRes.TxResponse.TxHash,
+				Log:  &grpcRes.TxResponse.RawLog,
+			}, nil
+		}
 	}
-	resp = TxResponse{
-		Code: &grpcRes.TxResponse.Code,
-		Hash: &grpcRes.TxResponse.TxHash,
-		Log:  &grpcRes.TxResponse.RawLog,
-	}
-	return
+	return TxResponse{}, errors.New("failed sending tx after " + strconv.Itoa(g.Retries+1) + " attempts. last err: " + err.Error())
 }

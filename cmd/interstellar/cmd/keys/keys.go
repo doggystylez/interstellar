@@ -39,10 +39,6 @@ func newCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend) {
-				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists") //nolint
-				return
-			}
 			mnemonic, bytes, err := keys.NewKeyWithSeed()
 			if err != nil {
 				panic(err)
@@ -72,10 +68,6 @@ func restoreCmd() (cmd *cobra.Command) {
 			config.TxInfo.KeyInfo.KeyRing, err = flags.ProccesKeyManageFlags(cmd)
 			if err != nil {
 				panic(err)
-			}
-			if keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend) {
-				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists") //nolint
-				return
 			}
 			isHex, err := cmd.Flags().GetBool("hex")
 			if err != nil {

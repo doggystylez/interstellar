@@ -32,39 +32,22 @@ func fetchCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			config.TxInfo.KeyInfo.KeyRing, err = flags.ProccesKeyManageFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
-			if !keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend) {
-				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "does not exist exists") //nolint
+			flags.CheckTxInfo(&config)
+			if keys.AddressExists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.TxInfo.KeyInfo.ChainId, config.Path, true) {
+				fmt.Println("address for key", config.TxInfo.KeyInfo.KeyRing.KeyName, "already exists for", config.TxInfo.KeyInfo.ChainId) //nolint
 				return
 			}
-			bytes, err := keys.Load(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend, "")
-			if err != nil {
-				panic(err)
-			}
-			prefix, err := query.GetAddressPrefix(config.Rpc)
-			if err != nil {
-				panic(err)
-			}
-			address, err := keys.BechAddress(prefix, bytes)
-			if err != nil {
-				panic(err)
-			}
-			chainId, err := query.GetChainId(config.Rpc)
-			if err != nil {
-				panic(err)
-			}
-			err = keys.SaveToAddrbook(config.TxInfo.KeyInfo.KeyRing.KeyName, address, chainId.ChainId, config.Path, true)
+			err = keys.SaveAccountInfo(config.TxInfo.KeyInfo.KeyRing.KeyName, config.TxInfo.Address,
+				config.TxInfo.KeyInfo.ChainId, config.TxInfo.KeyInfo.AccNum, config.TxInfo.KeyInfo.SeqNum, config.Path)
 			if err != nil {
 				panic(err)
 			} else {
-				fmt.Println("address", address, "saved to address book") //nolint
+				fmt.Println("address", config.TxInfo.Address, "saved to address book") //nolint
 			}
 		},
 	}
@@ -83,10 +66,7 @@ func saveCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			config.TxInfo.KeyInfo.KeyRing, err = flags.ProccesKeyManageFlags(cmd)
 			if err != nil {
 				panic(err)

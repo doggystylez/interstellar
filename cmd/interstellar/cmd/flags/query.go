@@ -5,22 +5,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ProcessQueryFlags(cmd *cobra.Command) (rpc grpc.Client, err error) {
-	rpc.Endpoint, err = cmd.Flags().GetString("node")
+func ProcessQueryFlags(cmd *cobra.Command) grpc.Client {
+	endpoint, err := cmd.Flags().GetString("node")
 	if err != nil {
-		return
+		panic(err)
 	}
-	rpc.Timeout, err = cmd.Flags().GetInt("timeout")
+	timeout, err := cmd.Flags().GetInt("timeout")
 	if err != nil {
-		return
+		panic(err)
 	}
-	return
+	retries, err := cmd.Flags().GetInt("retries")
+	if err != nil {
+		panic(err)
+	}
+	return grpc.New(endpoint, timeout, retries, 2)
 }
 
 func QueryFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
 	for _, cmd := range rawCmds {
 		cmd.Flags().StringP("node", "n", "localhost:9090", "gRPC server address")
-		cmd.Flags().IntP("timeout", "t", 1, "gRPC timeout")
+		cmd.Flags().IntP("retries", "r", 0, "gRPC retries")
+		cmd.Flags().IntP("timeout", "t", 1, "gRPC timeout in seconds")
 		cmds = append(cmds, cmd)
 	}
 	return

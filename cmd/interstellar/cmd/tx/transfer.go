@@ -29,10 +29,7 @@ func transferCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
 			msgInfo.Amount, err = strconv.ParseUint(args[1], 10, 64)
 			if err != nil {
@@ -73,10 +70,7 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.Rpc, err = flags.ProcessQueryFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
+			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
 			msgInfo.Channel, err = cmd.Flags().GetString("channel-id")
 			if err != nil {
