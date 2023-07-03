@@ -9,7 +9,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ProcessKeyFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error) {
+func ProccesKeyManageFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error) {
+	keyRing.KeyName, err = cmd.Flags().GetString("key")
+	if err != nil {
+		return
+	}
+	keyRing.Backend, err = cmd.Flags().GetString("keyring-backend")
+	if err != nil {
+		return
+	}
+	return
+}
+
+func ProcessKeySigningFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error) {
 	keyRing.KeyName, err = cmd.Flags().GetString("key")
 	if err != nil {
 		return
@@ -38,7 +50,20 @@ func ProcessKeyFlags(cmd *cobra.Command) (keyRing keys.KeyRing, err error) {
 	return
 }
 
-func KeyFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
+func KeyManageFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
+	for _, cmd := range rawCmds {
+		cmd.Flags().StringP("key", "k", "", "key name")
+		err := cmd.MarkFlagRequired("key")
+		if err != nil {
+			return
+		}
+		cmd.Flags().StringP("keyring-backend", "b", "test", "keyring backend")
+		cmds = append(cmds, cmd)
+	}
+	return
+}
+
+func KeySigningFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
 	for _, cmd := range rawCmds {
 		cmd.Flags().StringP("priv", "v", "", "private key")
 		cmd.Flags().StringP("key", "k", "", "key name")

@@ -1,4 +1,4 @@
-package querycli
+package query
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func QueryCmd() (qyCmd *cobra.Command) {
 		Short:   "Query chain via gRPC",
 		Long:    "Query chain via gRPC",
 	}
-	cmds := flags.AddFlags([]*cobra.Command{accountCmd(), addressCmd(), balanceCmd()}, flags.KeyFlags, flags.GlobalFlags)
+	cmds := flags.AddFlags([]*cobra.Command{accountCmd(), addressCmd(), balanceCmd()}, flags.KeySigningFlags, flags.GlobalFlags)
 	cmds = flags.AddFlags(append(cmds, chainCmd()), flags.QueryFlags)
 	qyCmd.AddCommand(cmds...)
 	return
@@ -60,14 +60,11 @@ func accountCmd() (cmd *cobra.Command) {
 			if len(args) == 1 {
 				config.TxInfo.Address = args[0]
 			} else {
-				config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+				config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 				if err != nil {
 					panic(err)
 				}
-				err = flags.CheckAddress(&config)
-				if err != nil {
-					panic(err)
-				}
+				flags.CheckAddress(&config)
 			}
 			account, err := query.GetAccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
 			if err != nil {
@@ -94,14 +91,11 @@ func addressCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
-			err = flags.CheckAddress(&config)
-			if err != nil {
-				panic(err)
-			}
+			flags.CheckAddress(&config)
 			fmt.Println(query.Jsonify(query.AddressRes{Address: config.TxInfo.Address})) //nolint
 		},
 	}
@@ -129,14 +123,11 @@ func balanceCmd() (cmd *cobra.Command) {
 			if len(args) == 1 {
 				config.TxInfo.Address = args[0]
 			} else {
-				config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+				config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 				if err != nil {
 					panic(err)
 				}
-				err = flags.CheckAddress(&config)
-				if err != nil {
-					panic(err)
-				}
+				flags.CheckAddress(&config)
 			}
 			denom, err := cmd.Flags().GetString("denom")
 			if err != nil {

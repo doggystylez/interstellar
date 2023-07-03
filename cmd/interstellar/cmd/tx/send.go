@@ -1,4 +1,4 @@
-package txcli
+package tx
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func sendCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
@@ -33,10 +33,7 @@ func sendCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = flags.CheckTxInfo(&config)
-			if err != nil {
-				panic(err)
-			}
+			flags.CheckTxInfo(&config)
 			msgInfo.Amount, err = strconv.ParseUint(args[1], 10, 64)
 			if err != nil {
 				panic(err)
@@ -67,7 +64,7 @@ func sendAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
@@ -75,10 +72,7 @@ func sendAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = flags.CheckTxInfo(&config)
-			if err != nil {
-				panic(err)
-			}
+			flags.CheckTxInfo(&config)
 			amount, err := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
 			if err != nil {
 				panic(err)

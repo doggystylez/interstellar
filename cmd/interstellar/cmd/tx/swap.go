@@ -1,4 +1,4 @@
-package txcli
+package tx
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ func swapCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
@@ -35,10 +35,7 @@ func swapCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = flags.CheckTxInfo(&config)
-			if err != nil {
-				panic(err)
-			}
+			flags.CheckTxInfo(&config)
 			msgInfo.Amount, err = strconv.ParseUint(args[0], 10, 64)
 			if err != nil {
 				panic(err)

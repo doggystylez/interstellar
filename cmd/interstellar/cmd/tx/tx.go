@@ -1,4 +1,4 @@
-package txcli
+package tx
 
 import (
 	"github.com/doggystylez/interstellar/client/tx"
@@ -15,7 +15,7 @@ func TxCmd() (txCmd *cobra.Command) {
 		Short:   "Send a transaction via gRPC",
 		Long:    "Send a transaction via gRPC. Queries chain and account info if not provided",
 	}
-	cmds := flags.AddFlags([]*cobra.Command{sendCmd(), sendAllCmd(), transferCmd(), transferAllCmd(), swapCmd()}, flags.TxFlags, flags.KeyFlags, flags.QueryFlags, flags.GlobalFlags)
+	cmds := flags.AddFlags([]*cobra.Command{sendCmd(), sendAllCmd(), transferCmd(), transferAllCmd(), swapCmd()}, flags.TxFlags, flags.KeySigningFlags, flags.QueryFlags, flags.GlobalFlags)
 	txCmd.AddCommand(cmds...)
 	return
 }

@@ -1,9 +1,11 @@
-package keycli
+package keys
 
 import (
 	"bufio"
+	"encoding/hex"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/doggystylez/interstellar/client/keys"
 	"github.com/doggystylez/interstellar/cmd/interstellar/cmd/flags"
@@ -17,7 +19,7 @@ func KeysCmd() (keyCmd *cobra.Command) {
 		Short:   "manage keys",
 		Long:    "manage keys",
 	}
-	cmds := flags.AddFlags([]*cobra.Command{newCmd(), restoreCmd()}, flags.KeyFlags, flags.GlobalFlags)
+	cmds := flags.AddFlags([]*cobra.Command{newCmd(), restoreCmd()}, flags.KeyManageFlags, flags.GlobalFlags)
 	keyCmd.AddCommand(cmds...)
 	return
 }
@@ -33,7 +35,7 @@ func newCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProccesKeyManageFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
@@ -59,14 +61,15 @@ func restoreCmd() (cmd *cobra.Command) {
 	cmd = &cobra.Command{
 		Use:   "restore",
 		Short: "restore an existing key",
-		Long:  "restore an existing key",
+		Long:  "restore an existing key from mnemonic or hex",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
+			var bytes []byte
 			config, err := flags.ProcessGlobalFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProccesKeyManageFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
@@ -74,15 +77,32 @@ func restoreCmd() (cmd *cobra.Command) {
 				fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "already exists") //nolint
 				return
 			}
-			reader := bufio.NewReader(os.Stdin)
-			fmt.Print("enter your mnemonic") //nolint
-			config.TxInfo.KeyInfo.KeyRing.Mnemonic, err = reader.ReadString('\n')
+			isHex, err := cmd.Flags().GetBool("hex")
 			if err != nil {
 				panic(err)
 			}
-			bytes, err := keys.KeyFromSeed(config.TxInfo.KeyInfo.KeyRing.Mnemonic)
-			if err != nil {
-				panic(err)
+			if !isHex {
+				reader := bufio.NewReader(os.Stdin)
+				fmt.Print("enter your mnemonic: ") //nolint
+				mnemonic, err := reader.ReadString('\n')
+				if err != nil {
+					panic(err)
+				}
+				bytes, err = keys.KeyFromSeed(mnemonic)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				reader := bufio.NewReader(os.Stdin)
+				fmt.Print("enter your hex key: ") //nolint
+				privKey, err := reader.ReadString('\n')
+				if err != nil {
+					panic(err)
+				}
+				bytes, err = hex.DecodeString(strings.TrimSuffix(privKey, string('\n')))
+				if err != nil {
+					panic(err)
+				}
 			}
 			err = keys.Save(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, bytes, "")
 			if err != nil {
@@ -92,5 +112,6 @@ func restoreCmd() (cmd *cobra.Command) {
 			}
 		},
 	}
+	cmd.Flags().Bool("hex", false, "restore from hex encoded private key")
 	return
 }

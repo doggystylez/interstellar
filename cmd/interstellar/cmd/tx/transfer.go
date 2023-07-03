@@ -1,4 +1,4 @@
-package txcli
+package tx
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func transferCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
@@ -33,10 +33,7 @@ func transferCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = flags.CheckTxInfo(&config)
-			if err != nil {
-				panic(err)
-			}
+			flags.CheckTxInfo(&config)
 			msgInfo.Amount, err = strconv.ParseUint(args[1], 10, 64)
 			if err != nil {
 				panic(err)
@@ -72,7 +69,7 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeyFlags(cmd)
+			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
 			if err != nil {
 				panic(err)
 			}
@@ -80,10 +77,7 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			err = flags.CheckTxInfo(&config)
-			if err != nil {
-				panic(err)
-			}
+			flags.CheckTxInfo(&config)
 			msgInfo.Channel, err = cmd.Flags().GetString("channel-id")
 			if err != nil {
 				panic(err)

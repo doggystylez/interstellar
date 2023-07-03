@@ -41,7 +41,6 @@ func ProcessGlobalFlags(cmd *cobra.Command) (config types.InterstellarConfig, er
 
 		config.Path = home
 	} else if strings.HasPrefix(config.Path, "~/") {
-
 		config.Path = filepath.Join(home, config.Path[2:])
 	}
 	return
