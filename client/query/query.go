@@ -165,7 +165,7 @@ func GetAllContractData(address string, g grpc.Client) (ContractRes, error) {
 		} else {
 			var data ContractRes
 			for _, model := range res.Models {
-				data.Models = append(data.Models, Model{Key: string(model.Key), Value: string(model.Value)})
+				data.Models = append(data.Models, Model{Key: model.Key, Value: model.Value})
 			}
 			return data, nil
 		}

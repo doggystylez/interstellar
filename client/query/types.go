@@ -29,8 +29,8 @@ type (
 	}
 
 	Model struct {
-		Key   string `json:"key"`
-		Value string `json:"value"`
+		Key   []byte `json:"key"`
+		Value []byte `json:"value"`
 	}
 
 	retryErr struct {

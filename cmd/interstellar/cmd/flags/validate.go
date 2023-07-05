@@ -12,10 +12,12 @@ import (
 
 func CheckTxInfo(config *types.InterstellarConfig) {
 	CheckAddress(config)
+	LoadKey(config)
 	checkAccountInfo(config)
 }
 
-func LoadKey(config *types.InterstellarConfig) (err error) {
+func LoadKey(config *types.InterstellarConfig) {
+	var err error
 	if len(config.TxInfo.KeyInfo.KeyRing.KeyBytes) == 0 {
 		if !keys.Exists(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend) {
 			fmt.Println("key named", "`"+config.TxInfo.KeyInfo.KeyRing.KeyName+"`", "does not exist") //nolint
@@ -23,10 +25,9 @@ func LoadKey(config *types.InterstellarConfig) (err error) {
 		}
 		config.TxInfo.KeyInfo.KeyRing.KeyBytes, err = keys.Load(config.TxInfo.KeyInfo.KeyRing.KeyName, config.Path, config.TxInfo.KeyInfo.KeyRing.Backend, "")
 		if err != nil {
-			return
+			panic(err)
 		}
 	}
-	return
 }
 
 func CheckAddress(config *types.InterstellarConfig) {
@@ -34,10 +35,7 @@ func CheckAddress(config *types.InterstellarConfig) {
 	if config.TxInfo.Address == "" {
 		config.TxInfo.Address = keys.LoadAddress(config.TxInfo.KeyInfo.KeyRing.KeyName, config.TxInfo.KeyInfo.ChainId, config.Path, true)
 		if config.TxInfo.Address == "" {
-			err := LoadKey(config)
-			if err != nil {
-				panic(err)
-			}
+			LoadKey(config)
 			address, err := query.GetAddressPrefix(config.Rpc)
 			if err != nil {
 				panic(err)
