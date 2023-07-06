@@ -16,7 +16,6 @@ func MakeSendMsg(msgInfo MsgInfo) sdk.Msg {
 		ToAddress:   msgInfo.To,
 		Amount:      sdk.Coins{coin},
 	}
-
 }
 
 func MakeTransferMsg(msgInfo MsgInfo) sdk.Msg {
@@ -29,7 +28,6 @@ func MakeTransferMsg(msgInfo MsgInfo) sdk.Msg {
 		Receiver:         msgInfo.To,
 		TimeoutTimestamp: uint64(time.Now().UTC().Add(+30 * time.Minute).UnixNano()),
 	}
-
 }
 
 func MakeWasmMsg(msgInfo MsgInfo) sdk.Msg {
@@ -44,6 +42,9 @@ func MakeWasmMsg(msgInfo MsgInfo) sdk.Msg {
 	return msg
 }
 
-func msgtoMsgs(msg sdk.Msg) (msgs []sdk.Msg) {
-	return []sdk.Msg{msg}
+func makeMsgs(msgs []MsgInfo) (sdkMsgs []sdk.Msg) {
+	for _, msg := range msgs {
+		sdkMsgs = append(sdkMsgs, msg.Maker(msg))
+	}
+	return
 }

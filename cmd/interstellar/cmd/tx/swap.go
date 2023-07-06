@@ -44,7 +44,8 @@ func swapCmd() (cmd *cobra.Command) {
 			}
 			msgInfo.Contract = swapContract
 			msgInfo.ContractMsg = tx.MakeSwapContractMsg(args[0], args[1], args[2], slippage)
-			resp, err := tx.AssembleAndBroadcast(msgInfo, config.TxInfo, config.Rpc, tx.MakeWasmMsg)
+			msgInfo.Maker = tx.MakeWasmMsg
+			resp, err := tx.AssembleAndBroadcast([]tx.MsgInfo{msgInfo}, config.TxInfo, config.Rpc)
 			if err != nil {
 				panic(err)
 			}

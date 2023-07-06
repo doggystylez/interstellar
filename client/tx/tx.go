@@ -9,8 +9,8 @@ import (
 	"github.com/doggystylez/interstellar/client/grpc"
 )
 
-func AssembleAndBroadcast(msgInfo MsgInfo, txInfo TxInfo, rpc grpc.Client, maker MsgMaker) (TxResponse, error) {
-	txBytes, err := SignFromPrivkey(msgtoMsgs(maker(msgInfo)), txInfo)
+func AssembleAndBroadcast(msgs []MsgInfo, txInfo TxInfo, rpc grpc.Client) (TxResponse, error) {
+	txBytes, err := SignFromPrivkey(makeMsgs(msgs), txInfo)
 	if err != nil {
 		return TxResponse{}, err
 	}

@@ -20,6 +20,7 @@ type (
 		Channel     string
 		Contract    string
 		ContractMsg []byte
+		Maker       MsgMaker
 	}
 
 	TxInfo struct {
