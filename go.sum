@@ -168,8 +168,8 @@ github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 h1:fAjc9m62+UWV/WA
 github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
 github.com/docker/distribution v2.8.2+incompatible h1:T3de5rq0dB1j30rp0sA2rER+m322EBzniBPB6ZIzuh8=
 github.com/docker/distribution v2.8.2+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
-github.com/doggystylez/interstellar-proto v0.0.0-20230702142529-94e76cf43354 h1:xBfHYhq7fQYjrNGcy6X44uRluYsFN6cCYJ5gehiFaGw=
-github.com/doggystylez/interstellar-proto v0.0.0-20230702142529-94e76cf43354/go.mod h1:Giqw+zCm472xnGEykLztzqkdeHrpRLL0ecdHbXFkdi0=
+github.com/doggystylez/interstellar-proto v0.0.0-20230706165027-30cd2de10160 h1:zdK8y2kEj6Mg1ydn7Vm4h75kiJoLWO6aswAwkBAX4m4=
+github.com/doggystylez/interstellar-proto v0.0.0-20230706165027-30cd2de10160/go.mod h1:c5msFjecw/B+6ScYUyJQZLbixMnRjJoKUdkXWLcKt34=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=

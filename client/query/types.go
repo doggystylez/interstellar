@@ -33,8 +33,12 @@ type (
 		Value []byte `json:"value"`
 	}
 
-	retryErr struct {
+	RetryErr struct {
 		retries int
 		err     error
+	}
+
+	TxNotFoundErr struct {
+		message string
 	}
 )

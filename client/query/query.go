@@ -2,6 +2,7 @@ package query
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -11,13 +12,18 @@ import (
 	"github.com/doggystylez/interstellar-proto/account"
 	"github.com/doggystylez/interstellar-proto/balance"
 	"github.com/doggystylez/interstellar-proto/base"
+	"github.com/doggystylez/interstellar-proto/tx"
 	"github.com/doggystylez/interstellar-proto/wasm"
 	"github.com/doggystylez/interstellar/client/grpc"
 	"google.golang.org/protobuf/proto"
 )
 
-func (e retryErr) Error() string {
+func (e RetryErr) Error() string {
 	return "failed to query after " + strconv.Itoa(e.retries+1) + " attempts. last error: " + e.err.Error()
+}
+
+func (e TxNotFoundErr) Error() string {
+	return e.message
 }
 
 func decodePrefix(address string) string {
@@ -44,7 +50,7 @@ func GetChainId(g grpc.Client) (ChainIdRes, error) {
 			return ChainIdRes{ChainId: res.DefaultNodeInfo.GetNetwork()}, nil
 		}
 	}
-	return ChainIdRes{}, retryErr{retries: g.Retries, err: err}
+	return ChainIdRes{}, RetryErr{retries: g.Retries, err: err}
 }
 
 func GetAddressPrefix(g grpc.Client) (string, error) {
@@ -68,7 +74,7 @@ func GetAddressPrefix(g grpc.Client) (string, error) {
 			return decodePrefix(acct.Address), nil
 		}
 	}
-	return "", retryErr{retries: g.Retries, err: err}
+	return "", RetryErr{retries: g.Retries, err: err}
 }
 
 func GetAccountInfoFromAddress(address string, g grpc.Client) (AccountRes, error) {
@@ -92,7 +98,7 @@ func GetAccountInfoFromAddress(address string, g grpc.Client) (AccountRes, error
 			return AccountRes{Address: address, Account: acct.AccountNumber, Sequence: acct.Sequence}, nil
 		}
 	}
-	return AccountRes{}, retryErr{retries: g.Retries, err: err}
+	return AccountRes{}, RetryErr{retries: g.Retries, err: err}
 }
 
 func GetAllBalances(address string, g grpc.Client) (BalanceRes, error) {
@@ -122,7 +128,7 @@ func GetAllBalances(address string, g grpc.Client) (BalanceRes, error) {
 			return balances, nil
 		}
 	}
-	return BalanceRes{}, retryErr{retries: g.Retries, err: err}
+	return BalanceRes{}, RetryErr{retries: g.Retries, err: err}
 
 }
 
@@ -147,7 +153,7 @@ func GetBalanceByDenom(address string, denom string, g grpc.Client) (Balance, er
 			return Balance{Denom: res.Balance.Denom, Amount: amount}, nil
 		}
 	}
-	return Balance{}, retryErr{retries: g.Retries, err: err}
+	return Balance{}, RetryErr{retries: g.Retries, err: err}
 }
 
 func GetAllContractData(address string, g grpc.Client) (ContractRes, error) {
@@ -170,7 +176,7 @@ func GetAllContractData(address string, g grpc.Client) (ContractRes, error) {
 			return data, nil
 		}
 	}
-	return ContractRes{}, retryErr{retries: g.Retries, err: err}
+	return ContractRes{}, RetryErr{retries: g.Retries, err: err}
 }
 
 func GetContractDataByQuery(address string, query interface{}, queryRes interface{}, g grpc.Client) error {
@@ -201,7 +207,64 @@ func GetContractDataByQuery(address string, query interface{}, queryRes interfac
 			return nil
 		}
 	}
-	return retryErr{retries: g.Retries, err: err}
+	return RetryErr{retries: g.Retries, err: err}
+}
+
+func GetTx(hash *string, g grpc.Client) (*tx.GetTxResponse, error) {
+	*hash = strings.ToUpper(*hash)
+	err := g.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	client := tx.NewServiceClient(g.Conn)
+	var res *tx.GetTxResponse
+	for tries := -1; tries < g.Retries; tries++ {
+		res, err = client.GetTx(g.Ctx, &tx.GetTxRequest{Hash: *hash})
+		if err != nil {
+			if strings.Contains(err.Error(), *hash) && strings.Contains(err.Error(), "not found") {
+				return &tx.GetTxResponse{}, TxNotFoundErr{message: "tx " + *hash + " not found"}
+			}
+			time.Sleep(time.Duration(g.Interval) * time.Second)
+		} else {
+			return res, nil
+		}
+	}
+	return &tx.GetTxResponse{}, RetryErr{retries: g.Retries, err: err}
+}
+
+func GetTxCode(hash string, g grpc.Client) (int, error) {
+	txRes, err := GetTx(&hash, g)
+	if err != nil {
+		return -1, err
+	}
+	return int(txRes.TxResponse.Code), nil
+}
+
+func AwaitTx(hash string, waitTime int, g grpc.Client) (*tx.GetTxResponse, error) {
+	var (
+		err   error
+		txRes *tx.GetTxResponse
+	)
+	blockTime, timeNow := 6, time.Now()
+
+	for tries := -1; tries < g.Retries; tries++ {
+		txRes, err = GetTx(&hash, g)
+		if err != nil {
+			if errors.As(err, &TxNotFoundErr{}) {
+				if time.Since(timeNow) > time.Duration(waitTime)*time.Second {
+					return &tx.GetTxResponse{}, TxNotFoundErr{message: "tx " + hash + " not found after " + strconv.Itoa(waitTime) + " seconds"}
+				}
+				time.Sleep(time.Second * time.Duration(blockTime))
+				tries--
+			} else {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
+		} else {
+			return txRes, nil
+		}
+	}
+	return &tx.GetTxResponse{}, RetryErr{retries: g.Retries, err: err}
 }
 
 func Jsonify(input interface{}) (output string) {

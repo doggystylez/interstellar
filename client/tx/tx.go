@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/types/tx"
+	"github.com/doggystylez/interstellar-proto/tx"
 	"github.com/doggystylez/interstellar/client/grpc"
 )
 

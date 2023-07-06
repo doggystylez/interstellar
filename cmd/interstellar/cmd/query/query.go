@@ -16,7 +16,7 @@ func QueryCmd() (qyCmd *cobra.Command) {
 		Long:    "Query chain via gRPC",
 	}
 	cmds := flags.AddFlags([]*cobra.Command{accountCmd(), addressCmd(), balanceCmd()}, flags.KeySigningFlags, flags.GlobalFlags)
-	cmds = flags.AddFlags(append(cmds, chainCmd()), flags.QueryFlags)
+	cmds = flags.AddFlags(append(cmds, chainCmd(), txCmd()), flags.QueryFlags)
 	qyCmd.AddCommand(cmds...)
 	return
 }
@@ -34,6 +34,24 @@ func chainCmd() (cmd *cobra.Command) {
 				panic(err)
 			}
 			fmt.Println(query.Jsonify(chainId)) //nolint
+		},
+	}
+	return
+}
+
+func txCmd() (cmd *cobra.Command) {
+	cmd = &cobra.Command{
+		Use:   "tx <hash>",
+		Short: "Query transaction",
+		Long:  "Query transaction by hash",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			rpc := flags.ProcessQueryFlags(cmd)
+			tx, err := query.GetTx(&args[0], rpc)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(query.Jsonify(tx)) //nolint
 		},
 	}
 	return
