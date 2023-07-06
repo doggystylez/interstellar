@@ -4,10 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	crypto "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	"github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/doggystylez/interstellar/client/keys"
 )
 
@@ -24,12 +21,13 @@ type (
 	}
 
 	TxInfo struct {
-		Address   string
-		FeeAmount uint64
-		FeeDenom  string
-		Gas       uint64
-		Memo      string
-		KeyInfo   SigningInfo
+		Address        string
+		FeeAmount      uint64
+		FeeDenom       string
+		Gas            uint64
+		Memo           string
+		ConfirmTimeout int
+		KeyInfo        SigningInfo
 	}
 
 	SigningInfo struct {
@@ -40,9 +38,9 @@ type (
 	}
 
 	TxResponse struct {
-		Code *uint32 `json:"code"`
-		Hash *string `json:"hash"`
-		Log  *string `json:"log"`
+		Code uint32 `json:"code"`
+		Hash string `json:"hash"`
+		Log  string `json:"log"`
 	}
 
 	TxConfig struct {
@@ -84,22 +82,3 @@ type (
 		WindowSeconds      int    `json:"window_seconds"`
 	}
 )
-
-func NewTxConfig() TxConfig {
-	registry := codectypes.NewInterfaceRegistry()
-	cdc := codec.NewProtoCodec(registry)
-	aminoCodec := codec.NewLegacyAmino()
-	crypto.RegisterInterfaces(registry)
-	types.RegisterInterfaces(registry)
-	crypto.RegisterCrypto(aminoCodec)
-	txCfg := authtx.NewTxConfig(cdc, authtx.DefaultSignModes)
-	encCfg := encodingConfig{
-		InterfaceRegistry: registry,
-		Codec:             cdc,
-		Amino:             aminoCodec,
-	}
-	txBuilder := txCfg.NewTxBuilder()
-	return TxConfig{
-		cdc, txCfg, txBuilder, encCfg,
-	}
-}

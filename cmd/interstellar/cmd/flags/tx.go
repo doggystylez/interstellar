@@ -26,6 +26,10 @@ func ProcessTxFlags(cmd *cobra.Command) (txInfo tx.TxInfo, err error) {
 	if err != nil {
 		return
 	}
+	txInfo.ConfirmTimeout, err = cmd.Flags().GetInt("wait")
+	if err != nil {
+		return
+	}
 	txInfo.KeyInfo.ChainId, err = cmd.Flags().GetString("chain-id")
 	if err != nil {
 		return
@@ -51,6 +55,7 @@ func TxFlags(rawCmds ...*cobra.Command) (cmds []*cobra.Command) {
 		cmd.Flags().StringP("fee-denom", "d", "", "fee denom")
 		cmd.Flags().Uint64P("gas", "g", 300000, "gas")
 		cmd.Flags().StringP("memo", "m", "", "memo")
+		cmd.Flags().IntP("wait", "w", 15, "seconds to wait for confirmation")
 		cmds = append(cmds, cmd)
 	}
 	return

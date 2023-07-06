@@ -9,10 +9,7 @@ import (
 )
 
 func SignFromPrivkey(msg []sdk.Msg, txInfo TxInfo) (txBytes []byte, err error) {
-	txConfig, err := buildTx(msg, txInfo)
-	if err != nil {
-		return
-	}
+	buildTx(msg, txInfo, &txConfig)
 	sigData := signing.SingleSignatureData{
 		SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
 		Signature: nil,
@@ -48,14 +45,15 @@ func SignFromPrivkey(msg []sdk.Msg, txInfo TxInfo) (txBytes []byte, err error) {
 	return
 }
 
-func buildTx(msgs []sdk.Msg, txInfo TxInfo) (txConfig TxConfig, err error) {
-	txConfig = NewTxConfig()
+func buildTx(msgs []sdk.Msg, txInfo TxInfo, txCfg *TxConfig) {
 	if txInfo.FeeDenom != "" {
 		feeCoin := sdk.NewCoin(txInfo.FeeDenom, sdk.NewIntFromUint64(txInfo.FeeAmount))
-		txConfig.TxBuilder.SetFeeAmount(sdk.Coins{feeCoin})
+		txCfg.TxBuilder.SetFeeAmount(sdk.Coins{feeCoin})
 	}
-	txConfig.TxBuilder.SetGasLimit(txInfo.Gas)
-	txConfig.TxBuilder.SetMemo(txInfo.Memo)
-	err = txConfig.TxBuilder.SetMsgs(msgs...)
-	return
+	txCfg.TxBuilder.SetGasLimit(txInfo.Gas)
+	txCfg.TxBuilder.SetMemo(txInfo.Memo)
+	err := txCfg.TxBuilder.SetMsgs(msgs...)
+	if err != nil {
+		panic(err)
+	}
 }
