@@ -16,7 +16,7 @@ func QueryCmd() (qyCmd *cobra.Command) {
 		Long:    "Query chain via gRPC",
 	}
 	cmds := flags.AddFlags([]*cobra.Command{chainCmd(), txCmd()}, flags.QueryFlags)
-	qyCmd.AddCommand(append(cmds, accountCmd(), poolCmd())...)
+	qyCmd.AddCommand(append(cmds, accountCmd(), swapCmd())...)
 	return
 }
 

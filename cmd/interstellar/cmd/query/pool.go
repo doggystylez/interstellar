@@ -9,13 +9,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func poolCmd() (cmd *cobra.Command) {
+func swapCmd() (cmd *cobra.Command) {
 	cmd = &cobra.Command{
-		Use:   "pool",
-		Short: "Osmosis pool queries",
-		Long:  "Osmosis pool queries",
+		Use:   "swap",
+		Short: "Osmosis swap queries",
+		Long:  "Osmosis swap queries",
 	}
-	cmds := flags.AddFlags([]*cobra.Command{priceCmd(), swapEstimateCmd()}, flags.GlobalFlags, flags.QueryFlags)
+	// cmds := flags.AddFlags([]*cobra.Command{priceCmd(), estimateCmd()}, flags.GlobalFlags, flags.QueryFlags)
+	cmds := flags.AddFlags([]*cobra.Command{priceCmd()}, flags.GlobalFlags, flags.QueryFlags)
 	cmd.AddCommand(cmds...)
 	return
 }
@@ -42,24 +43,24 @@ func priceCmd() (cmd *cobra.Command) {
 	return
 }
 
-func swapEstimateCmd() (cmd *cobra.Command) {
-	cmd = &cobra.Command{
-		Use:   "swap-estimate <pool> <amount> <denom_in> <denom_out>",
-		Short: "Estimate Osmosis swap",
-		Long:  "Estimate Osmosis swap",
-		Args:  cobra.ExactArgs(4),
-		Run: func(cmd *cobra.Command, args []string) {
-			rpc := flags.ProcessQueryFlags(cmd)
-			pool, err := strconv.Atoi(args[0])
-			if err != nil {
-				panic(err)
-			}
-			price, err := query.EstimateSwapSinglePool(pool, args[1], args[2], args[3], rpc)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(query.Jsonify(price)) //nolint
-		},
-	}
-	return
-}
+// func estimateCmd() (cmd *cobra.Command) {
+// 	cmd = &cobra.Command{
+// 		Use:   "estimate <pool> <amount> <denom_in> <denom_out>",
+// 		Short: "Estimate Osmosis swap",
+// 		Long:  "Estimate Osmosis swap",
+// 		Args:  cobra.ExactArgs(4),
+// 		Run: func(cmd *cobra.Command, args []string) {
+// 			rpc := flags.ProcessQueryFlags(cmd)
+// 			pool, err := strconv.Atoi(args[0])
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 			price, err := query.EstimateSwapSinglePool(pool, args[1], args[2], args[3], rpc)
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 			fmt.Println(query.Jsonify(price)) //nolint
+// 		},
+// 	}
+// 	return
+// }

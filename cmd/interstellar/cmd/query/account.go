@@ -11,8 +11,8 @@ import (
 func accountCmd() (accountCmd *cobra.Command) {
 	accountCmd = &cobra.Command{
 		Use:   "account",
-		Short: "account and address info",
-		Long:  "account and address info",
+		Short: "Account and address queries",
+		Long:  "Account and address queries",
 	}
 	cmds := flags.AddFlags([]*cobra.Command{infoCmd(), addressCmd(), balanceCmd()}, flags.KeySigningFlags, flags.GlobalFlags, flags.QueryFlags)
 	accountCmd.AddCommand(cmds...)
