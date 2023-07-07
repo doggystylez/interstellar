@@ -39,7 +39,7 @@ func TestSignFromPrivKey(t *testing.T) {
 	txBytes, err := SignFromPrivkey([]sdk.Msg{MakeSendMsg(MsgInfo{
 		From:   testAddress,
 		To:     testAddress,
-		Amount: 1,
+		Amount: "1",
 		Denom:  "uosmo",
 	})}, testTxInfo)
 	if err != nil {

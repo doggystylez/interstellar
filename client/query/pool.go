@@ -3,11 +3,15 @@ package query
 import (
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/types/query"
+	legacy_pool "github.com/doggystylez/interstellar-proto/query/legacy-pool"
 	"github.com/doggystylez/interstellar-proto/query/pool"
+
 	"github.com/doggystylez/interstellar/client/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
-func SpotPrice(poolId int, base string, quote string, g grpc.Client) (SpotPriceRes, error) {
+func SpotPrice(poolId uint64, base string, quote string, g grpc.Client) (SpotPriceRes, error) {
 	var res *pool.SpotPriceResponse
 	err := g.Open()
 	if err != nil {
@@ -15,15 +19,18 @@ func SpotPrice(poolId int, base string, quote string, g grpc.Client) (SpotPriceR
 	}
 	defer g.Close()
 	client := pool.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
-
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.SpotPrice(g.Ctx, &pool.SpotPriceRequest{
-			PoolId:          uint64(poolId),
+			PoolId:          poolId,
 			BaseAssetDenom:  base,
 			QuoteAssetDenom: quote,
 		})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			return SpotPriceRes{
 				Base:  base,
@@ -35,7 +42,7 @@ func SpotPrice(poolId int, base string, quote string, g grpc.Client) (SpotPriceR
 	return SpotPriceRes{}, RetryErr{retries: g.Retries, err: err}
 }
 
-func EstimateSwapSinglePool(poolId int, amountIn string, tokenIn string, denomOut string, g grpc.Client) (SwapEstimate, error) {
+func EstimateSwapSinglePool(poolId uint64, amountIn string, tokenIn string, denomOut string, g grpc.Client) (SwapEstimate, error) {
 	var res *pool.EstimateSwapExactAmountInResponse
 	err := g.Open()
 	if err != nil {
@@ -43,14 +50,18 @@ func EstimateSwapSinglePool(poolId int, amountIn string, tokenIn string, denomOu
 	}
 	defer g.Close()
 	client := pool.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.EstimateSinglePoolSwapExactAmountIn(g.Ctx, &pool.EstimateSinglePoolSwapExactAmountInRequest{
-			PoolId:        uint64(poolId),
+			PoolId:        poolId,
 			TokenIn:       amountIn + tokenIn,
 			TokenOutDenom: denomOut,
 		})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			return SwapEstimate{
 				TokenIn:  Token{Denom: tokenIn, Amount: amountIn},
@@ -61,29 +72,134 @@ func EstimateSwapSinglePool(poolId int, amountIn string, tokenIn string, denomOu
 	return SwapEstimate{}, RetryErr{retries: g.Retries, err: err}
 }
 
-// wip
-func EstimateSwap(poolId int, amountIn string, tokenIn string, route []SwapRoute, g grpc.Client) (SwapEstimate, error) {
+func EstimateSwap(poolId uint64, amountIn string, tokenIn string, route []SwapRoute, g grpc.Client) (SwapEstimate, error) {
 	var res *pool.EstimateSwapExactAmountInResponse
+	queryRoutes := make([]*pool.SwapAmountInRoute, len(route))
 	err := g.Open()
 	if err != nil {
 		panic(err)
 	}
 	defer g.Close()
 	client := pool.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	for i := range route {
+		queryRoutes[i] = &pool.SwapAmountInRoute{
+			PoolId:        route[i].PoolId,
+			TokenOutDenom: route[i].DenomOut,
+		}
+	}
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.EstimateSwapExactAmountIn(g.Ctx, &pool.EstimateSwapExactAmountInRequest{
 			PoolId:  uint64(poolId),
 			TokenIn: amountIn + tokenIn,
-			Routes:  []*pool.SwapAmountInRoute{},
+			Routes:  queryRoutes,
 		})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			return SwapEstimate{
 				TokenIn:  Token{Denom: tokenIn, Amount: amountIn},
-				TokenOut: Token{Denom: "", Amount: res.TokenOutAmount},
+				TokenOut: Token{Denom: route[len(route)-1].DenomOut, Amount: res.TokenOutAmount},
 			}, nil
 		}
 	}
 	return SwapEstimate{}, RetryErr{retries: g.Retries, err: err}
+}
+
+func NumPools(g grpc.Client) (*pool.NumPoolsResponse, error) {
+	var res *pool.NumPoolsResponse
+	err := g.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	client := pool.NewQueryClient(g.Conn)
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
+		res, err = client.NumPools(g.Ctx, &pool.NumPoolsRequest{})
+		if err != nil {
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
+		} else {
+			return res, nil
+		}
+	}
+	return &pool.NumPoolsResponse{}, RetryErr{retries: g.Retries, err: err}
+}
+
+func AllPools(g grpc.Client) (PoolsRes, error) {
+	// var res *pool.AllPoolsResponse
+	var res *legacy_pool.QueryPoolsResponse
+	var poolList PoolsRes
+	err := g.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	// client := pool.NewQueryClient(g.Conn)
+	client := legacy_pool.NewQueryClient(g.Conn)
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
+		//	res, err = client.AllPools(g.Ctx, &pool.AllPoolsRequest{})
+		res, err = client.Pools(g.Ctx, &legacy_pool.QueryPoolsRequest{Pagination: &query.PageRequest{Limit: 2000}})
+		if err != nil {
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
+		} else {
+			for _, p := range res.Pools {
+				if p.TypeUrl == "/osmosis.gamm.v1beta1.Pool" {
+					var (
+						b      pool.BalancerPool
+						assets []PoolAsset
+					)
+					err = proto.Unmarshal(p.Value, &b)
+					if err != nil {
+						return PoolsRes{}, err
+					}
+					for _, asset := range b.PoolAssets {
+						assets = append(assets, PoolAsset{
+							Token: Token{
+								Denom:  asset.Token.Denom,
+								Amount: asset.Token.Amount,
+							},
+							Weight: asset.Weight,
+						})
+					}
+					poolList.Balancer = append(poolList.Balancer, BalancerPool{
+						Id:         b.Id,
+						PoolAssets: assets,
+					})
+				} else if p.TypeUrl == "/osmosis.gamm.poolmodels.stableswap.v1beta1.Pool" {
+					var (
+						s      pool.StableswapPool
+						tokens []Token
+					)
+					err = proto.Unmarshal(p.Value, &s)
+					if err != nil {
+						return PoolsRes{}, err
+					}
+					for _, asset := range s.PoolLiquidity {
+						tokens = append(tokens, Token{
+							Denom:  asset.Denom,
+							Amount: asset.Amount,
+						})
+					}
+					poolList.Stableswap = append(poolList.Stableswap, StableswapPool{
+						Id:             s.Id,
+						PoolLiquidity:  tokens,
+						ScalingFactors: s.ScalingFactors,
+					})
+				}
+			}
+			return poolList, nil
+		}
+	}
+	return PoolsRes{}, RetryErr{retries: g.Retries, err: err}
 }

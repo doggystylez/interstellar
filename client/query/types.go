@@ -16,12 +16,12 @@ type (
 	}
 
 	BalanceRes struct {
-		Balances []Balance `json:"balances"`
+		Balances []Token `json:"balances"`
 	}
 
-	Balance struct {
+	Token struct {
 		Denom  string `json:"denom"`
-		Amount uint64 `json:"amount"`
+		Amount string `json:"amount"`
 	}
 
 	ContractRes struct {
@@ -42,8 +42,6 @@ type (
 	SwapEstimate struct {
 		TokenIn  Token `json:"token_in"`
 		TokenOut Token `json:"token_out"`
-		//	AmountIn  string `json:"price"`
-		//	AmountOut string
 	}
 
 	SwapRoute struct {
@@ -51,9 +49,25 @@ type (
 		DenomOut string `json:"token_out"`
 	}
 
-	Token struct {
-		Denom  string `json:"denom"`
-		Amount string `json:"amount"`
+	PoolsRes struct {
+		Balancer   []BalancerPool   `json:"balancer"`
+		Stableswap []StableswapPool `json:"stableswap"`
+	}
+
+	BalancerPool struct {
+		Id         uint64      `json:"id,omitempty"`
+		PoolAssets []PoolAsset `json:"pool_assets,omitempty"`
+	}
+
+	StableswapPool struct {
+		Id             uint64   `json:"id"`
+		PoolLiquidity  []Token  `json:"pool_liquidity"`
+		ScalingFactors []uint64 `json:"scaling_factors"`
+	}
+
+	PoolAsset struct {
+		Token  `json:"token,omitempty"`
+		Weight string `json:"weight,omitempty"`
 	}
 
 	RetryErr struct {

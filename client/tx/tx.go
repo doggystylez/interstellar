@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	crypto "github.com/cosmos/cosmos-sdk/crypto/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/doggystylez/interstellar-proto/tx"
@@ -42,6 +43,19 @@ func AssembleAndBroadcast(msgs []MsgInfo, txInfo TxInfo, rpc grpc.Client) (TxRes
 	return broadcastTx(txBytes, txInfo.ConfirmTimeout, rpc)
 }
 
+func buildTx(msgs []sdk.Msg, txInfo TxInfo, txCfg *TxConfig) {
+	if txInfo.FeeDenom != "" {
+		feeCoin := sdk.NewCoin(txInfo.FeeDenom, sdk.NewIntFromUint64(txInfo.FeeAmount))
+		txCfg.TxBuilder.SetFeeAmount(sdk.Coins{feeCoin})
+	}
+	txCfg.TxBuilder.SetGasLimit(txInfo.Gas)
+	txCfg.TxBuilder.SetMemo(txInfo.Memo)
+	err := txCfg.TxBuilder.SetMsgs(msgs...)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error) {
 	var broadcastRes *tx.BroadcastTxResponse
 	err := g.Open()
@@ -50,7 +64,9 @@ func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error)
 	}
 	defer g.Close()
 	txClient := tx.NewServiceClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		broadcastRes, err = txClient.BroadcastTx(
 			g.Ctx,
 			&tx.BroadcastTxRequest{
@@ -59,7 +75,9 @@ func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error)
 			},
 		)
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			if broadcastRes.TxResponse.Code == 0 {
 				if timeout == 0 {

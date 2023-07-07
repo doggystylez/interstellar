@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func poolCmd() (cmd *cobra.Command) {
+func swapCmd() (cmd *cobra.Command) {
 	cmd = &cobra.Command{
-		Use:   "pool",
-		Short: "Osmosis pool queries",
-		Long:  "Osmosis pool queries",
+		Use:   "swap",
+		Short: "Osmosis swap queries",
+		Long:  "Osmosis swap queries",
 	}
 	cmds := flags.AddFlags([]*cobra.Command{priceCmd(), swapEstimateCmd()}, flags.GlobalFlags, flags.QueryFlags)
 	cmd.AddCommand(cmds...)
@@ -23,12 +23,12 @@ func poolCmd() (cmd *cobra.Command) {
 func priceCmd() (cmd *cobra.Command) {
 	cmd = &cobra.Command{
 		Use:   "spot-price <pool> <denom_in> <denom_out>",
-		Short: "Query Osmosis spot price",
-		Long:  "Query Osmosis spot price",
+		Short: "Query spot price",
+		Long:  "Query spot price",
 		Args:  cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
 			rpc := flags.ProcessQueryFlags(cmd)
-			pool, err := strconv.Atoi(args[0])
+			pool, err := strconv.ParseUint(args[0], 10, 64)
 			if err != nil {
 				panic(err)
 			}
@@ -44,13 +44,13 @@ func priceCmd() (cmd *cobra.Command) {
 
 func swapEstimateCmd() (cmd *cobra.Command) {
 	cmd = &cobra.Command{
-		Use:   "swap-estimate <pool> <amount> <denom_in> <denom_out>",
-		Short: "Estimate Osmosis swap",
-		Long:  "Estimate Osmosis swap",
+		Use:   "estimate <pool> <amount> <denom_in> <denom_out>",
+		Short: "Estimate swap",
+		Long:  "Estimate swap",
 		Args:  cobra.ExactArgs(4),
 		Run: func(cmd *cobra.Command, args []string) {
 			rpc := flags.ProcessQueryFlags(cmd)
-			pool, err := strconv.Atoi(args[0])
+			pool, err := strconv.ParseUint(args[0], 10, 64)
 			if err != nil {
 				panic(err)
 			}

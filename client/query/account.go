@@ -1,7 +1,6 @@
 package query
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -19,10 +18,14 @@ func AddressPrefix(g grpc.Client) (string, error) {
 	}
 	defer g.Close()
 	client := account.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.Accounts(g.Ctx, &account.QueryAccountsRequest{Pagination: &query.PageRequest{Limit: 1}})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			acct := &account.BaseAccount{}
 			err = proto.Unmarshal(res.Accounts[0].Value, acct)
@@ -43,10 +46,14 @@ func AccountInfoFromAddress(address string, g grpc.Client) (AccountRes, error) {
 	}
 	defer g.Close()
 	client := account.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.Account(g.Ctx, &account.QueryAccountRequest{Address: address})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			acct := &account.BaseAccount{}
 			err = proto.Unmarshal(res.Account.Value, acct)
@@ -67,21 +74,18 @@ func AllBalances(address string, g grpc.Client) (BalanceRes, error) {
 	}
 	defer g.Close()
 	client := balance.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.AllBalances(g.Ctx, &balance.QueryAllBalancesRequest{Address: address})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
-			var (
-				balances BalanceRes
-				amount   uint64
-			)
+			var balances BalanceRes
 			for _, coin := range res.Balances {
-				amount, err = strconv.ParseUint(coin.Amount, 10, 64)
-				if err != nil {
-					panic(err)
-				}
-				balances.Balances = append(balances.Balances, Balance{Denom: coin.Denom, Amount: amount})
+				balances.Balances = append(balances.Balances, Token{Denom: coin.Denom, Amount: coin.Amount})
 			}
 			return balances, nil
 		}
@@ -90,7 +94,7 @@ func AllBalances(address string, g grpc.Client) (BalanceRes, error) {
 
 }
 
-func BalanceByDenom(address string, denom string, g grpc.Client) (Balance, error) {
+func BalanceByDenom(address string, denom string, g grpc.Client) (Token, error) {
 	var res *balance.QueryBalanceResponse
 	err := g.Open()
 	if err != nil {
@@ -98,18 +102,17 @@ func BalanceByDenom(address string, denom string, g grpc.Client) (Balance, error
 	}
 	defer g.Close()
 	client := balance.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.Balance(g.Ctx, &balance.QueryBalanceRequest{Address: address, Denom: denom})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
-		} else {
-			var amount uint64
-			amount, err = strconv.ParseUint(res.Balance.Amount, 10, 64)
-			if err != nil {
-				panic(err)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
 			}
-			return Balance{Denom: res.Balance.Denom, Amount: amount}, nil
+		} else {
+			return Token{Denom: res.Balance.Denom, Amount: res.Balance.Amount}, nil
 		}
 	}
-	return Balance{}, RetryErr{retries: g.Retries, err: err}
+	return Token{}, RetryErr{retries: g.Retries, err: err}
 }

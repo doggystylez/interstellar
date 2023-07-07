@@ -12,7 +12,7 @@ type (
 	MsgInfo struct {
 		From        string
 		To          string
-		Amount      uint64
+		Amount      string
 		Denom       string
 		Channel     string
 		Contract    string

@@ -31,15 +31,11 @@ func transferCmd() (cmd *cobra.Command) {
 			}
 			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
-			msgInfo.Amount, err = strconv.ParseUint(args[1], 10, 64)
-			if err != nil {
-				panic(err)
-			}
 			msgInfo.Channel, err = cmd.Flags().GetString("channel-id")
 			if err != nil {
 				panic(err)
 			}
-			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[2]
+			msgInfo.From, msgInfo.To, msgInfo.Amount, msgInfo.Denom = config.TxInfo.Address, args[0], args[1], args[2]
 			msgInfo.Maker = tx.MakeTransferMsg
 			resp, err := tx.AssembleAndBroadcast([]tx.MsgInfo{msgInfo}, config.TxInfo, config.Rpc)
 			if err != nil {
@@ -77,15 +73,20 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			amount, err := query.BalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
+			token, err := query.BalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
 			if err != nil {
 				panic(err)
 			}
 			msgInfo.From, msgInfo.To, msgInfo.Denom = config.TxInfo.Address, args[0], args[1]
 			if config.TxInfo.FeeDenom == msgInfo.Denom {
-				msgInfo.Amount = amount.Amount - config.TxInfo.FeeAmount
+				var amount uint64
+				amount, err = strconv.ParseUint(token.Amount, 10, 64)
+				if err != nil {
+					panic(err)
+				}
+				msgInfo.Amount = strconv.FormatUint(amount-config.TxInfo.FeeAmount, 10)
 			} else {
-				msgInfo.Amount = amount.Amount
+				msgInfo.Amount = token.Amount
 			}
 			msgInfo.Maker = tx.MakeTransferMsg
 			resp, err := tx.AssembleAndBroadcast([]tx.MsgInfo{msgInfo}, config.TxInfo, config.Rpc)

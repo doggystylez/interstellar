@@ -11,6 +11,7 @@ import (
 )
 
 func Tx(hash *string, g grpc.Client) (*tx.GetTxResponse, error) {
+	var res *tx.GetTxResponse
 	*hash = strings.ToUpper(*hash)
 	err := g.Open()
 	if err != nil {
@@ -18,14 +19,17 @@ func Tx(hash *string, g grpc.Client) (*tx.GetTxResponse, error) {
 	}
 	defer g.Close()
 	client := tx.NewServiceClient(g.Conn)
-	var res *tx.GetTxResponse
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.GetTx(g.Ctx, &tx.GetTxRequest{Hash: *hash})
 		if err != nil {
 			if strings.Contains(err.Error(), *hash) && strings.Contains(err.Error(), "not found") {
 				return &tx.GetTxResponse{}, TxNotFoundErr{message: "tx " + *hash + " not found"}
 			}
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			return res, nil
 		}
@@ -47,8 +51,9 @@ func AwaitTx(hash string, waitTime int, g grpc.Client) (*tx.GetTxResponse, error
 		txRes *tx.GetTxResponse
 	)
 	blockTime, timeNow := 6, time.Now()
-
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		txRes, err = Tx(&hash, g)
 		if err != nil {
 			if errors.As(err, &TxNotFoundErr{}) {
@@ -58,7 +63,9 @@ func AwaitTx(hash string, waitTime int, g grpc.Client) (*tx.GetTxResponse, error
 				time.Sleep(time.Second * time.Duration(blockTime))
 				tries--
 			} else {
-				time.Sleep(time.Duration(g.Interval) * time.Second)
+				if tries < maxTries {
+					time.Sleep(time.Duration(g.Interval) * time.Second)
+				}
 			}
 		} else {
 			return txRes, nil

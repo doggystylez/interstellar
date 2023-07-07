@@ -2,7 +2,6 @@ package tx
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/doggystylez/interstellar/client/query"
 	"github.com/doggystylez/interstellar/client/tx"
@@ -33,11 +32,7 @@ func swapCmd() (cmd *cobra.Command) {
 			}
 			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
-			msgInfo.Amount, err = strconv.ParseUint(args[0], 10, 64)
-			if err != nil {
-				panic(err)
-			}
-			msgInfo.From, msgInfo.Denom = config.TxInfo.Address, args[1]
+			msgInfo.From, msgInfo.Amount, msgInfo.Denom = config.TxInfo.Address, args[0], args[1]
 			slippage, err := cmd.Flags().GetString("slippage")
 			if err != nil {
 				panic(err)

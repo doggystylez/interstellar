@@ -44,16 +44,3 @@ func SignFromPrivkey(msg []sdk.Msg, txInfo TxInfo) (txBytes []byte, err error) {
 	}
 	return
 }
-
-func buildTx(msgs []sdk.Msg, txInfo TxInfo, txCfg *TxConfig) {
-	if txInfo.FeeDenom != "" {
-		feeCoin := sdk.NewCoin(txInfo.FeeDenom, sdk.NewIntFromUint64(txInfo.FeeAmount))
-		txCfg.TxBuilder.SetFeeAmount(sdk.Coins{feeCoin})
-	}
-	txCfg.TxBuilder.SetGasLimit(txInfo.Gas)
-	txCfg.TxBuilder.SetMemo(txInfo.Memo)
-	err := txCfg.TxBuilder.SetMsgs(msgs...)
-	if err != nil {
-		panic(err)
-	}
-}

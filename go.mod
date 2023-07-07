@@ -2,13 +2,15 @@ module github.com/doggystylez/interstellar
 
 go 1.20
 
+replace github.com/doggystylez/interstellar-proto => github.com/doggystylez/interstellar-proto v0.0.0-20230707200135-5585fde857b5
+
 require (
 	github.com/99designs/keyring v1.2.2
 	github.com/cosmos/btcutil v1.0.5
 	github.com/cosmos/cosmos-sdk v0.47.3
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v7 v7.2.0
-	github.com/doggystylez/interstellar-proto v0.0.0-20230706165027-30cd2de10160
+	github.com/doggystylez/interstellar-proto v0.0.1-alpha.2
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/term v0.10.0
 	google.golang.org/grpc v1.56.2

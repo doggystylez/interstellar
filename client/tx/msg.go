@@ -10,7 +10,11 @@ import (
 )
 
 func MakeSendMsg(msgInfo MsgInfo) sdk.Msg {
-	coin := sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))
+	amount, ok := sdk.NewIntFromString(msgInfo.Amount)
+	if !ok {
+		panic("conversion from " + msgInfo.Amount + " to big.Int failed")
+	}
+	coin := sdk.NewCoin(msgInfo.Denom, amount)
 	return &banktypes.MsgSend{
 		FromAddress: msgInfo.From,
 		ToAddress:   msgInfo.To,
@@ -19,7 +23,11 @@ func MakeSendMsg(msgInfo MsgInfo) sdk.Msg {
 }
 
 func MakeTransferMsg(msgInfo MsgInfo) sdk.Msg {
-	coin := sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))
+	amount, ok := sdk.NewIntFromString(msgInfo.Amount)
+	if !ok {
+		panic("conversion from " + msgInfo.Amount + " to big.Int failed")
+	}
+	coin := sdk.NewCoin(msgInfo.Denom, amount)
 	return &ibctypes.MsgTransfer{
 		SourcePort:       "transfer",
 		SourceChannel:    msgInfo.Channel,
@@ -36,8 +44,12 @@ func MakeWasmMsg(msgInfo MsgInfo) sdk.Msg {
 		Contract: msgInfo.Contract,
 		Msg:      msgInfo.ContractMsg,
 	}
-	if msgInfo.Amount != 0 {
-		msg.Funds = sdk.Coins{sdk.NewCoin(msgInfo.Denom, sdk.NewIntFromUint64(msgInfo.Amount))}
+	if msgInfo.Amount != "" {
+		amount, ok := sdk.NewIntFromString(msgInfo.Amount)
+		if !ok {
+			panic("conversion from " + msgInfo.Amount + " to big.Int failed")
+		}
+		msg.Funds = sdk.Coins{sdk.NewCoin(msgInfo.Denom, amount)}
 	}
 	return msg
 }

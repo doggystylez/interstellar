@@ -37,10 +37,14 @@ func ChainId(g grpc.Client) (ChainIdRes, error) {
 	}
 	defer g.Close()
 	client := base.NewServiceClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.GetNodeInfo(g.Ctx, &base.GetNodeInfoRequest{})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			return ChainIdRes{ChainId: res.DefaultNodeInfo.GetNetwork()}, nil
 		}
@@ -56,10 +60,14 @@ func AllContractData(address string, g grpc.Client) (ContractRes, error) {
 	}
 	defer g.Close()
 	client := wasm.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.AllContractState(g.Ctx, &wasm.QueryAllContractStateRequest{Address: address, Pagination: &query.PageRequest{Limit: 2000}})
 		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
 		} else {
 			var data ContractRes
 			for _, model := range res.Models {
@@ -83,13 +91,17 @@ func ContractDataByQuery(address string, query interface{}, queryRes interface{}
 	if err != nil {
 		panic(err)
 	}
-	for tries := -1; tries < g.Retries; tries++ {
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
 		res, err = client.SmartContractState(g.Ctx, &wasm.QuerySmartContractStateRequest{Address: address, QueryData: data})
 		if err != nil {
 			if strings.Contains(err.Error(), "query wasm contract failed") {
 				return err
 			} else {
-				time.Sleep(time.Duration(g.Interval) * time.Second)
+				if tries < maxTries {
+					time.Sleep(time.Duration(g.Interval) * time.Second)
+				}
 			}
 		} else {
 			err = json.Unmarshal(res.Data, &queryRes)
