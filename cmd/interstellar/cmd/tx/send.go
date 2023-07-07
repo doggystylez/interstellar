@@ -68,7 +68,7 @@ func sendAllCmd() (cmd *cobra.Command) {
 			}
 			config.Rpc = flags.ProcessQueryFlags(cmd)
 			flags.CheckTxInfo(&config)
-			amount, err := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
+			amount, err := query.BalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
 			if err != nil {
 				panic(err)
 			}

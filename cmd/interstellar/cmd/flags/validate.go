@@ -36,7 +36,7 @@ func CheckAddress(config *types.InterstellarConfig) {
 		config.TxInfo.Address = keys.LoadAddress(config.TxInfo.KeyInfo.KeyRing.KeyName, config.TxInfo.KeyInfo.ChainId, config.Path, true)
 		if config.TxInfo.Address == "" {
 			LoadKey(config)
-			address, err := query.GetAddressPrefix(config.Rpc)
+			address, err := query.AddressPrefix(config.Rpc)
 			if err != nil {
 				panic(err)
 			}
@@ -50,7 +50,7 @@ func CheckAddress(config *types.InterstellarConfig) {
 
 func checkChainId(config *types.InterstellarConfig) {
 	if config.TxInfo.KeyInfo.ChainId == "" {
-		chainId, err := query.GetChainId(config.Rpc)
+		chainId, err := query.ChainId(config.Rpc)
 		if err != nil {
 			panic(err)
 		}
@@ -60,7 +60,7 @@ func checkChainId(config *types.InterstellarConfig) {
 
 func checkAccountInfo(config *types.InterstellarConfig) {
 	if config.TxInfo.KeyInfo.AccNum == 0 || config.TxInfo.KeyInfo.SeqNum == 0 {
-		account, err := query.GetAccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
+		account, err := query.AccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
 		if err != nil {
 			if strings.Contains(err.Error(), "NotFound") {
 				config.TxInfo.KeyInfo.AccNum, config.TxInfo.KeyInfo.SeqNum = 0, 0

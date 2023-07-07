@@ -25,7 +25,7 @@ func TestChainID(t *testing.T) {
 		panic(err)
 	}
 	defer testClient.Close()
-	chainId, _ := GetChainId(testClient)
+	chainId, _ := ChainId(testClient)
 	if chainId.ChainId != testchainId {
 		t.Errorf("GetChainId failed - wanted %v, got %v", testchainId, chainId.ChainId)
 
@@ -38,7 +38,7 @@ func TestAccountInfo(t *testing.T) {
 		panic(err)
 	}
 	defer testClient.Close()
-	account, _ := GetAccountInfoFromAddress(testAddress, testClient)
+	account, _ := AccountInfoFromAddress(testAddress, testClient)
 	if account.Account != testAccount {
 		t.Errorf("getaccount failed - wanted %v, got %v", testAccount, account.Account)
 
@@ -51,7 +51,7 @@ func TestGetPrefix(t *testing.T) {
 		panic(err)
 	}
 	defer testClient.Close()
-	prefix, _ := GetAddressPrefix(testClient)
+	prefix, _ := AddressPrefix(testClient)
 	if prefix != testPrefix {
 		t.Errorf("getprefix failed - wanted %v, got %v", testPrefix, prefix)
 

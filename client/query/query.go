@@ -2,20 +2,15 @@ package query
 
 import (
 	"encoding/json"
-	"errors"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cosmos/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/doggystylez/interstellar-proto/account"
-	"github.com/doggystylez/interstellar-proto/balance"
-	"github.com/doggystylez/interstellar-proto/base"
-	"github.com/doggystylez/interstellar-proto/tx"
-	"github.com/doggystylez/interstellar-proto/wasm"
+	"github.com/doggystylez/interstellar-proto/query/base"
+	"github.com/doggystylez/interstellar-proto/query/wasm"
 	"github.com/doggystylez/interstellar/client/grpc"
-	"google.golang.org/protobuf/proto"
 )
 
 func (e RetryErr) Error() string {
@@ -34,7 +29,7 @@ func decodePrefix(address string) string {
 	return prefix
 }
 
-func GetChainId(g grpc.Client) (ChainIdRes, error) {
+func ChainId(g grpc.Client) (ChainIdRes, error) {
 	var res *base.GetNodeInfoResponse
 	err := g.Open()
 	if err != nil {
@@ -53,110 +48,7 @@ func GetChainId(g grpc.Client) (ChainIdRes, error) {
 	return ChainIdRes{}, RetryErr{retries: g.Retries, err: err}
 }
 
-func GetAddressPrefix(g grpc.Client) (string, error) {
-	var res *account.QueryAccountsResponse
-	err := g.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer g.Close()
-	client := account.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
-		res, err = client.Accounts(g.Ctx, &account.QueryAccountsRequest{Pagination: &query.PageRequest{Limit: 1}})
-		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
-		} else {
-			acct := &account.BaseAccount{}
-			err = proto.Unmarshal(res.Accounts[0].Value, acct)
-			if err != nil {
-				panic(err)
-			}
-			return decodePrefix(acct.Address), nil
-		}
-	}
-	return "", RetryErr{retries: g.Retries, err: err}
-}
-
-func GetAccountInfoFromAddress(address string, g grpc.Client) (AccountRes, error) {
-	var res *account.QueryAccountResponse
-	err := g.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer g.Close()
-	client := account.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
-		res, err = client.Account(g.Ctx, &account.QueryAccountRequest{Address: address})
-		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
-		} else {
-			acct := &account.BaseAccount{}
-			err = proto.Unmarshal(res.Account.Value, acct)
-			if err != nil {
-				panic(err)
-			}
-			return AccountRes{Address: address, Account: acct.AccountNumber, Sequence: acct.Sequence}, nil
-		}
-	}
-	return AccountRes{}, RetryErr{retries: g.Retries, err: err}
-}
-
-func GetAllBalances(address string, g grpc.Client) (BalanceRes, error) {
-	var res *balance.QueryAllBalancesResponse
-	err := g.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer g.Close()
-	client := balance.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
-		res, err = client.AllBalances(g.Ctx, &balance.QueryAllBalancesRequest{Address: address})
-		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
-		} else {
-			var (
-				balances BalanceRes
-				amount   uint64
-			)
-			for _, coin := range res.Balances {
-				amount, err = strconv.ParseUint(coin.Amount, 10, 64)
-				if err != nil {
-					panic(err)
-				}
-				balances.Balances = append(balances.Balances, Balance{Denom: coin.Denom, Amount: amount})
-			}
-			return balances, nil
-		}
-	}
-	return BalanceRes{}, RetryErr{retries: g.Retries, err: err}
-
-}
-
-func GetBalanceByDenom(address string, denom string, g grpc.Client) (Balance, error) {
-	var res *balance.QueryBalanceResponse
-	err := g.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer g.Close()
-	client := balance.NewQueryClient(g.Conn)
-	for tries := -1; tries < g.Retries; tries++ {
-		res, err = client.Balance(g.Ctx, &balance.QueryBalanceRequest{Address: address, Denom: denom})
-		if err != nil {
-			time.Sleep(time.Duration(g.Interval) * time.Second)
-		} else {
-			var amount uint64
-			amount, err = strconv.ParseUint(res.Balance.Amount, 10, 64)
-			if err != nil {
-				panic(err)
-			}
-			return Balance{Denom: res.Balance.Denom, Amount: amount}, nil
-		}
-	}
-	return Balance{}, RetryErr{retries: g.Retries, err: err}
-}
-
-func GetAllContractData(address string, g grpc.Client) (ContractRes, error) {
+func AllContractData(address string, g grpc.Client) (ContractRes, error) {
 	var res *wasm.QueryAllContractStateResponse
 	err := g.Open()
 	if err != nil {
@@ -179,7 +71,7 @@ func GetAllContractData(address string, g grpc.Client) (ContractRes, error) {
 	return ContractRes{}, RetryErr{retries: g.Retries, err: err}
 }
 
-func GetContractDataByQuery(address string, query interface{}, queryRes interface{}, g grpc.Client) error {
+func ContractDataByQuery(address string, query interface{}, queryRes interface{}, g grpc.Client) error {
 	var res *wasm.QuerySmartContractStateResponse
 	err := g.Open()
 	if err != nil {
@@ -208,63 +100,6 @@ func GetContractDataByQuery(address string, query interface{}, queryRes interfac
 		}
 	}
 	return RetryErr{retries: g.Retries, err: err}
-}
-
-func GetTx(hash *string, g grpc.Client) (*tx.GetTxResponse, error) {
-	*hash = strings.ToUpper(*hash)
-	err := g.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer g.Close()
-	client := tx.NewServiceClient(g.Conn)
-	var res *tx.GetTxResponse
-	for tries := -1; tries < g.Retries; tries++ {
-		res, err = client.GetTx(g.Ctx, &tx.GetTxRequest{Hash: *hash})
-		if err != nil {
-			if strings.Contains(err.Error(), *hash) && strings.Contains(err.Error(), "not found") {
-				return &tx.GetTxResponse{}, TxNotFoundErr{message: "tx " + *hash + " not found"}
-			}
-			time.Sleep(time.Duration(g.Interval) * time.Second)
-		} else {
-			return res, nil
-		}
-	}
-	return &tx.GetTxResponse{}, RetryErr{retries: g.Retries, err: err}
-}
-
-func GetTxCode(hash string, g grpc.Client) (int, error) {
-	txRes, err := GetTx(&hash, g)
-	if err != nil {
-		return -1, err
-	}
-	return int(txRes.TxResponse.Code), nil
-}
-
-func AwaitTx(hash string, waitTime int, g grpc.Client) (*tx.GetTxResponse, error) {
-	var (
-		err   error
-		txRes *tx.GetTxResponse
-	)
-	blockTime, timeNow := 6, time.Now()
-
-	for tries := -1; tries < g.Retries; tries++ {
-		txRes, err = GetTx(&hash, g)
-		if err != nil {
-			if errors.As(err, &TxNotFoundErr{}) {
-				if time.Since(timeNow) > time.Duration(waitTime)*time.Second {
-					return &tx.GetTxResponse{}, TxNotFoundErr{message: "tx " + hash + " not found after " + strconv.Itoa(waitTime) + " seconds"}
-				}
-				time.Sleep(time.Second * time.Duration(blockTime))
-				tries--
-			} else {
-				time.Sleep(time.Duration(g.Interval) * time.Second)
-			}
-		} else {
-			return txRes, nil
-		}
-	}
-	return &tx.GetTxResponse{}, RetryErr{retries: g.Retries, err: err}
 }
 
 func Jsonify(input interface{}) (output string) {

@@ -77,7 +77,7 @@ func transferAllCmd() (cmd *cobra.Command) {
 			if err != nil {
 				panic(err)
 			}
-			amount, err := query.GetBalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
+			amount, err := query.BalanceByDenom(config.TxInfo.Address, args[1], config.Rpc)
 			if err != nil {
 				panic(err)
 			}

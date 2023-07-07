@@ -75,7 +75,7 @@ func saveCmd() (cmd *cobra.Command) {
 				chainId = args[1]
 			} else {
 				var res query.ChainIdRes
-				res, err = query.GetChainId(config.Rpc)
+				res, err = query.ChainId(config.Rpc)
 				if err != nil {
 					panic(err)
 				}

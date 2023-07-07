@@ -33,6 +33,29 @@ type (
 		Value []byte `json:"value"`
 	}
 
+	SpotPriceRes struct {
+		Base  string `json:"base"`
+		Quote string `json:"quote"`
+		Price string `json:"price"`
+	}
+
+	SwapEstimate struct {
+		TokenIn  Token `json:"token_in"`
+		TokenOut Token `json:"token_out"`
+		//	AmountIn  string `json:"price"`
+		//	AmountOut string
+	}
+
+	SwapRoute struct {
+		PoolId   uint64 `json:"pool_id"`
+		DenomOut string `json:"token_out"`
+	}
+
+	Token struct {
+		Denom  string `json:"denom"`
+		Amount string `json:"amount"`
+	}
+
 	RetryErr struct {
 		retries int
 		err     error

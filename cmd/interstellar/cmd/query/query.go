@@ -15,9 +15,8 @@ func QueryCmd() (qyCmd *cobra.Command) {
 		Short:   "Query chain via gRPC",
 		Long:    "Query chain via gRPC",
 	}
-	cmds := flags.AddFlags([]*cobra.Command{accountCmd(), addressCmd(), balanceCmd()}, flags.KeySigningFlags, flags.GlobalFlags)
-	cmds = flags.AddFlags(append(cmds, chainCmd(), txCmd()), flags.QueryFlags)
-	qyCmd.AddCommand(cmds...)
+	cmds := flags.AddFlags([]*cobra.Command{chainCmd(), txCmd()}, flags.QueryFlags)
+	qyCmd.AddCommand(append(cmds, accountCmd(), poolCmd())...)
 	return
 }
 
@@ -29,7 +28,7 @@ func chainCmd() (cmd *cobra.Command) {
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
 			rpc := flags.ProcessQueryFlags(cmd)
-			chainId, err := query.GetChainId(rpc)
+			chainId, err := query.ChainId(rpc)
 			if err != nil {
 				panic(err)
 			}
@@ -47,115 +46,12 @@ func txCmd() (cmd *cobra.Command) {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			rpc := flags.ProcessQueryFlags(cmd)
-			tx, err := query.GetTx(&args[0], rpc)
+			tx, err := query.Tx(&args[0], rpc)
 			if err != nil {
 				panic(err)
 			}
 			fmt.Println(query.Jsonify(tx)) //nolint
 		},
 	}
-	return
-}
-
-func accountCmd() (cmd *cobra.Command) {
-	cmd = &cobra.Command{
-		Use:   "account <address>",
-		Short: "Query account info",
-		Long:  "Query account info by address, keyname, or privkey",
-		Args:  cobra.MaximumNArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			config, err := flags.ProcessGlobalFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
-			config.Rpc = flags.ProcessQueryFlags(cmd)
-			if len(args) == 1 {
-				config.TxInfo.Address = args[0]
-			} else {
-				config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
-				if err != nil {
-					panic(err)
-				}
-				flags.CheckAddress(&config)
-			}
-			account, err := query.GetAccountInfoFromAddress(config.TxInfo.Address, config.Rpc)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(query.Jsonify(account)) //nolint
-		},
-	}
-	return
-}
-
-func addressCmd() (cmd *cobra.Command) {
-	cmd = &cobra.Command{
-		Use:   "address",
-		Short: "Query account address",
-		Long:  "Query account address by keyname or privkey",
-		Args:  cobra.ExactArgs(0),
-		Run: func(cmd *cobra.Command, args []string) {
-			config, err := flags.ProcessGlobalFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
-			config.Rpc = flags.ProcessQueryFlags(cmd)
-			config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
-			flags.CheckAddress(&config)
-			fmt.Println(query.Jsonify(query.AddressRes{Address: config.TxInfo.Address})) //nolint
-		},
-	}
-	return
-}
-
-func balanceCmd() (cmd *cobra.Command) {
-	cmd = &cobra.Command{
-		Use:   "balance <address>",
-		Short: "Query account balance",
-		Long:  "Query account balance, with optional denom filter",
-		Args:  cobra.MaximumNArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			var (
-				balances interface{}
-			)
-			config, err := flags.ProcessGlobalFlags(cmd)
-			if err != nil {
-				panic(err)
-			}
-			config.Rpc = flags.ProcessQueryFlags(cmd)
-			if len(args) == 1 {
-				config.TxInfo.Address = args[0]
-			} else {
-				config.TxInfo.KeyInfo.KeyRing, err = flags.ProcessKeySigningFlags(cmd)
-				if err != nil {
-					panic(err)
-				}
-				flags.CheckAddress(&config)
-			}
-			denom, err := cmd.Flags().GetString("denom")
-			if err != nil {
-				return
-			}
-			if denom == "" {
-				resp, err := query.GetAllBalances(config.TxInfo.Address, config.Rpc)
-				if err != nil {
-					panic(err)
-				}
-				balances = resp.Balances
-
-			} else {
-				resp, err := query.GetBalanceByDenom(config.TxInfo.Address, denom, config.Rpc)
-				if err != nil {
-					panic(err)
-				}
-				balances = resp
-			}
-			fmt.Println(query.Jsonify(balances)) //nolint
-		},
-	}
-	cmd.Flags().StringP("denom", "d", "", "denom")
 	return
 }
