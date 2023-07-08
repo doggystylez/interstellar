@@ -29,6 +29,54 @@ func decodePrefix(address string) string {
 	return prefix
 }
 
+// LatesTendermintBlock
+func LatestBlock(g grpc.Client) (BlockRes, error) {
+	var res *base.GetLatestBlockResponse
+	err := g.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	client := base.NewServiceClient(g.Conn)
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
+		res, err = client.GetLatestBlock(g.Ctx, &base.GetLatestBlockRequest{})
+		if err != nil {
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
+		} else {
+			return BlockRes{Block: *res.Block}, nil
+		}
+	}
+	return BlockRes{}, RetryErr{retries: g.Retries, err: err}
+}
+
+// TendermintBlock
+func Block(height int64, g grpc.Client) (BlockRes, error) {
+	var res *base.GetBlockByHeightResponse
+	err := g.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	client := base.NewServiceClient(g.Conn)
+	tries, maxTries := 0, g.Retries+1
+	for tries < maxTries {
+		tries++
+		res, err = client.GetBlockByHeight(g.Ctx, &base.GetBlockByHeightRequest{Height: height})
+		if err != nil {
+			if tries < maxTries {
+				time.Sleep(time.Duration(g.Interval) * time.Second)
+			}
+		} else {
+			return BlockRes{Block: *res.Block}, nil
+		}
+	}
+	return BlockRes{}, RetryErr{retries: g.Retries, err: err}
+}
+
 func ChainId(g grpc.Client) (ChainIdRes, error) {
 	var res *base.GetNodeInfoResponse
 	err := g.Open()

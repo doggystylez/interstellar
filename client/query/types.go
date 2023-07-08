@@ -1,8 +1,14 @@
 package query
 
+import "github.com/cometbft/cometbft/proto/tendermint/types"
+
 type (
 	ChainIdRes struct {
 		ChainId string `json:"chain_id"`
+	}
+
+	BlockRes struct {
+		Block types.Block `json:"block"`
 	}
 
 	AddressRes struct {
@@ -49,20 +55,14 @@ type (
 		DenomOut string `json:"token_out"`
 	}
 
-	PoolsRes struct {
-		Balancer   []BalancerPool   `json:"balancer"`
-		Stableswap []StableswapPool `json:"stableswap"`
-	}
+	PoolsRes []Pool
 
-	BalancerPool struct {
-		Id         uint64      `json:"id,omitempty"`
-		PoolAssets []PoolAsset `json:"pool_assets,omitempty"`
-	}
-
-	StableswapPool struct {
-		Id             uint64   `json:"id"`
-		PoolLiquidity  []Token  `json:"pool_liquidity"`
-		ScalingFactors []uint64 `json:"scaling_factors"`
+	Pool struct {
+		Id             uint64      `json:"id,omitempty"`
+		Type           string      `json:"type,omitempty"`
+		PoolAssets     []PoolAsset `json:"pool_assets,omitempty"`
+		PoolLiquidity  []Token     `json:"pool_liquidity,omitempty"`
+		ScalingFactors []uint64    `json:"scaling_factors,omitempty"`
 	}
 
 	PoolAsset struct {

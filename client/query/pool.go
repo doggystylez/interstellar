@@ -154,17 +154,17 @@ func AllPools(g grpc.Client) (PoolsRes, error) {
 			}
 		} else {
 			for _, p := range res.Pools {
-				if p.TypeUrl == "/osmosis.gamm.v1beta1.Pool" {
-					var (
-						b      pool.BalancerPool
-						assets []PoolAsset
-					)
+				o := Pool{
+					Type: p.TypeUrl,
+				}
+				if o.Type == "/osmosis.gamm.v1beta1.Pool" {
+					var b pool.BalancerPool
 					err = proto.Unmarshal(p.Value, &b)
 					if err != nil {
 						return PoolsRes{}, err
 					}
 					for _, asset := range b.PoolAssets {
-						assets = append(assets, PoolAsset{
+						o.PoolAssets = append(o.PoolAssets, PoolAsset{
 							Token: Token{
 								Denom:  asset.Token.Denom,
 								Amount: asset.Token.Amount,
@@ -172,31 +172,22 @@ func AllPools(g grpc.Client) (PoolsRes, error) {
 							Weight: asset.Weight,
 						})
 					}
-					poolList.Balancer = append(poolList.Balancer, BalancerPool{
-						Id:         b.Id,
-						PoolAssets: assets,
-					})
-				} else if p.TypeUrl == "/osmosis.gamm.poolmodels.stableswap.v1beta1.Pool" {
-					var (
-						s      pool.StableswapPool
-						tokens []Token
-					)
+					o.Id = b.Id
+				} else if o.Type == "/osmosis.gamm.poolmodels.stableswap.v1beta1.Pool" {
+					var s pool.StableswapPool
 					err = proto.Unmarshal(p.Value, &s)
 					if err != nil {
 						return PoolsRes{}, err
 					}
 					for _, asset := range s.PoolLiquidity {
-						tokens = append(tokens, Token{
+						o.PoolLiquidity = append(o.PoolLiquidity, Token{
 							Denom:  asset.Denom,
 							Amount: asset.Amount,
 						})
 					}
-					poolList.Stableswap = append(poolList.Stableswap, StableswapPool{
-						Id:             s.Id,
-						PoolLiquidity:  tokens,
-						ScalingFactors: s.ScalingFactors,
-					})
+					o.Id, o.ScalingFactors = s.Id, s.ScalingFactors
 				}
+				poolList = append(poolList, o)
 			}
 			return poolList, nil
 		}
