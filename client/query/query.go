@@ -8,9 +8,9 @@ import (
 
 	"github.com/cosmos/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/doggystylez/interstellar-proto/query/base"
-	"github.com/doggystylez/interstellar-proto/query/wasm"
 	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/proto/query/base"
+	"github.com/doggystylez/interstellar/proto/query/wasm"
 )
 
 func (e RetryErr) Error() string {

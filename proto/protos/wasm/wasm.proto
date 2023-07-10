@@ -1,0 +1,60 @@
+syntax = "proto3";
+package cosmwasm.wasm.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/doggystylez/interstellar/proto/query/wasm";
+
+service Query {
+  // AllContractState gets all raw store data for a single contract
+  rpc AllContractState(QueryAllContractStateRequest) returns (QueryAllContractStateResponse) {}
+
+  // SmartContractState get smart query result from the contract
+  rpc SmartContractState(QuerySmartContractStateRequest) returns (QuerySmartContractStateResponse) {}
+}
+
+// QueryAllContractStateRequest is the request type for the
+// Query/AllContractState RPC method
+message QueryAllContractStateRequest {
+  // address is the address of the contract
+  string address = 1;
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryAllContractStateResponse is the response type for the
+// Query/AllContractState RPC method
+message QueryAllContractStateResponse {
+  repeated Model models = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// Model is a struct that holds a KV pair
+message Model {
+  // hex-encode key to read it better (this is often ascii)
+  bytes key = 1 [(gogoproto.casttype) = "github.com/cometbft/cometbft/libs/bytes.HexBytes"];
+  // base64-encode raw value
+  bytes value = 2;
+}
+
+// QuerySmartContractStateRequest is the request type for the
+// Query/SmartContractState RPC method
+message QuerySmartContractStateRequest {
+  // address is the address of the contract
+  string address = 1;
+  // QueryData contains the query data passed to the contract
+  bytes query_data = 2 [(gogoproto.casttype) = "RawContractMessage"];
+}
+
+// QuerySmartContractStateResponse is the response type for the
+// Query/SmartContractState RPC method
+message QuerySmartContractStateResponse {
+  // Data contains the json data returned from the smart contract
+  bytes data = 1 [(gogoproto.casttype) = "RawContractMessage"];
+}

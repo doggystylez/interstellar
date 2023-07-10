@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/doggystylez/interstellar-proto/tx"
 	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/proto/tx"
 )
 
 func Tx(hash *string, g grpc.Client) (*tx.GetTxResponse, error) {

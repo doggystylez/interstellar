@@ -1,0 +1,164 @@
+syntax = "proto3";
+package cosmos.base.tendermint.v1beta1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "tendermint/types/block.proto";
+import "tendermint/types/evidence.proto";
+import "tendermint/types/types.proto";
+import "tendermint/version/types.proto";
+
+option go_package = "github.com/doggystylez/interstellar/proto/query/base";
+
+// Service defines the gRPC querier service for tendermint queries.
+service Service {
+  // GetNodeInfo queries the current node info.
+  rpc GetNodeInfo(GetNodeInfoRequest) returns (GetNodeInfoResponse) {}
+
+  // GetLatestBlock returns the latest block.
+  rpc GetLatestBlock(GetLatestBlockRequest) returns (GetLatestBlockResponse) {}
+
+  // GetBlockByHeight queries block for given height.
+  rpc GetBlockByHeight(GetBlockByHeightRequest) returns (GetBlockByHeightResponse) {}
+}
+
+message GetNodeInfoRequest {}
+
+// GetNodeInfoResponse is the response type for the Query/GetNodeInfo RPC method.
+message GetNodeInfoResponse {
+  DefaultNodeInfo default_node_info = 1;
+  VersionInfo application_version = 2;
+}
+
+// VersionInfo is the type for the GetNodeInfoResponse message.
+message VersionInfo {
+  string name = 1;
+  string app_name = 2;
+  string version = 3;
+  string git_commit = 4;
+  string build_tags = 5;
+  string go_version = 6;
+  repeated Module build_deps = 7;
+  // Since: cosmos-sdk 0.43
+  string cosmos_sdk_version = 8;
+}
+
+// Module is the type for VersionInfo
+message Module {
+  // module path
+  string path = 1;
+  // module version
+  string version = 2;
+  // checksum
+  string sum = 3;
+}
+
+message DefaultNodeInfo {
+  ProtocolVersion protocol_version = 1 [(gogoproto.nullable) = false];
+  string default_node_id = 2 [(gogoproto.customname) = "DefaultNodeID"];
+  string listen_addr = 3;
+  string network = 4;
+  string version = 5;
+  bytes channels = 6;
+  string moniker = 7;
+  DefaultNodeInfoOther other = 8 [(gogoproto.nullable) = false];
+}
+
+message ProtocolVersion {
+  uint64 p2p = 1 [(gogoproto.customname) = "P2P"];
+  uint64 block = 2;
+  uint64 app = 3;
+}
+
+message DefaultNodeInfoOther {
+  string tx_index = 1;
+  string rpc_address = 2 [(gogoproto.customname) = "RPCAddress"];
+}
+
+// GetBlockByHeightRequest is the request type for the Query/GetBlockByHeight RPC method.
+message GetBlockByHeightRequest {
+  int64 height = 1;
+}
+
+// GetBlockByHeightResponse is the response type for the Query/GetBlockByHeight RPC method.
+message GetBlockByHeightResponse {
+  .tendermint.types.BlockID block_id = 1;
+
+  // Deprecated: please use `sdk_block` instead
+  .tendermint.types.Block block = 2;
+
+  // Since: cosmos-sdk 0.47
+  Block sdk_block = 3;
+}
+
+// GetLatestBlockRequest is the request type for the Query/GetLatestBlock RPC method.
+message GetLatestBlockRequest {}
+
+// GetLatestBlockResponse is the response type for the Query/GetLatestBlock RPC method.
+message GetLatestBlockResponse {
+  .tendermint.types.BlockID block_id = 1;
+
+  // Deprecated: please use `sdk_block` instead
+  .tendermint.types.Block block = 2;
+
+  // Since: cosmos-sdk 0.47
+  Block sdk_block = 3;
+}
+
+message Block {
+  Header header = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  .tendermint.types.Data data = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  .tendermint.types.EvidenceList evidence = 3 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  .tendermint.types.Commit last_commit = 4;
+}
+
+// Header defines the structure of a Tendermint block header.
+message Header {
+  // basic block info
+  .tendermint.version.Consensus version = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  string chain_id = 2 [(gogoproto.customname) = "ChainID"];
+  int64 height = 3;
+  google.protobuf.Timestamp time = 4 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.stdtime) = true
+  ];
+
+  // prev block info
+  .tendermint.types.BlockID last_block_id = 5 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // hashes of block data
+  bytes last_commit_hash = 6; // commit from validators from the last block
+  bytes data_hash = 7; // transactions
+
+  // hashes from the app output from the prev block
+  bytes validators_hash = 8; // validators for the current block
+  bytes next_validators_hash = 9; // validators for the next block
+  bytes consensus_hash = 10; // consensus params for current block
+  bytes app_hash = 11; // state after txs from the previous block
+  bytes last_results_hash = 12; // root hash of all results from the txs from the previous block
+
+  // consensus info
+  bytes evidence_hash = 13; // evidence included in the block
+
+  // proposer_address is the original block proposer address, formatted as a Bech32 string.
+  // In Tendermint, this type is `bytes`, but in the SDK, we convert it to a Bech32 string
+  // for better UX.
+  string proposer_address = 14; // original proposer of the block
+}
