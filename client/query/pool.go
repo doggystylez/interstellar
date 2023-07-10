@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
-	legacy_pool "github.com/doggystylez/interstellar-proto/query/legacy-pool"
-	"github.com/doggystylez/interstellar-proto/query/pool"
+	legacy_pool "github.com/doggystylez/interstellar/proto/query/legacy-pool"
+	"github.com/doggystylez/interstellar/proto/query/pool"
 
 	"github.com/doggystylez/interstellar/client/grpc"
 	"google.golang.org/protobuf/proto"

@@ -11,9 +11,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/doggystylez/interstellar-proto/tx"
 	"github.com/doggystylez/interstellar/client/grpc"
 	"github.com/doggystylez/interstellar/client/query"
+	"github.com/doggystylez/interstellar/proto/tx"
 )
 
 var txConfig TxConfig

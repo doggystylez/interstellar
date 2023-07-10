@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/doggystylez/interstellar-proto/query/account"
-	"github.com/doggystylez/interstellar-proto/query/balance"
 	"github.com/doggystylez/interstellar/client/grpc"
+	"github.com/doggystylez/interstellar/proto/query/account"
+	"github.com/doggystylez/interstellar/proto/query/balance"
 	"google.golang.org/protobuf/proto"
 )
 
