@@ -2,8 +2,6 @@ module github.com/doggystylez/interstellar/client
 
 go 1.20
 
-replace github.com/doggystylez/interstellar/proto => ../proto
-
 require (
 	github.com/99designs/keyring v1.2.1
 	github.com/CosmWasm/wasmd v0.40.2
@@ -12,7 +10,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.47.3
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v7 v7.0.1
-	github.com/doggystylez/interstellar/proto v0.0.0-00010101000000-000000000000
+	github.com/doggystylez/interstellar/proto v0.0.1-legacy
 	golang.org/x/term v0.10.0
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0

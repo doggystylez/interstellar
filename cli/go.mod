@@ -4,8 +4,6 @@ go 1.20
 
 replace github.com/doggystylez/interstellar/client => ../client
 
-replace github.com/doggystylez/interstellar/proto => ../proto
-
 require (
 	github.com/doggystylez/interstellar/client v0.0.0-00010101000000-000000000000
 	github.com/spf13/cobra v1.6.1
@@ -48,7 +46,7 @@ require (
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/doggystylez/interstellar/proto v0.0.0-00010101000000-000000000000 // indirect
+	github.com/doggystylez/interstellar/proto v0.0.1-legacy // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
