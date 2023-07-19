@@ -39,37 +39,6 @@ type (
 		Value []byte `json:"value"`
 	}
 
-	SpotPriceRes struct {
-		Base  string `json:"base"`
-		Quote string `json:"quote"`
-		Price string `json:"price"`
-	}
-
-	SwapEstimate struct {
-		TokenIn  Token `json:"token_in"`
-		TokenOut Token `json:"token_out"`
-	}
-
-	SwapRoute struct {
-		PoolId   uint64 `json:"pool_id"`
-		DenomOut string `json:"token_out"`
-	}
-
-	PoolsRes []Pool
-
-	Pool struct {
-		Id             uint64      `json:"id,omitempty"`
-		Type           string      `json:"type,omitempty"`
-		PoolAssets     []PoolAsset `json:"pool_assets,omitempty"`
-		PoolLiquidity  []Token     `json:"pool_liquidity,omitempty"`
-		ScalingFactors []uint64    `json:"scaling_factors,omitempty"`
-	}
-
-	PoolAsset struct {
-		Token  `json:"token,omitempty"`
-		Weight string `json:"weight,omitempty"`
-	}
-
 	RetryErr struct {
 		retries int
 		err     error
