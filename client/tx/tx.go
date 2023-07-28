@@ -84,7 +84,7 @@ func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error)
 					return TxResponse{
 						Code: broadcastRes.TxResponse.Code,
 						Hash: broadcastRes.TxResponse.TxHash,
-						Log:  "tx broadcast, not waiting for confirmation",
+						Info: "tx broadcast, not waiting for confirmation",
 					}, nil
 				}
 				var txRes *tx.GetTxResponse
@@ -93,32 +93,41 @@ func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error)
 					return TxResponse{ // nolint
 						Code: broadcastRes.TxResponse.Code,
 						Hash: broadcastRes.TxResponse.TxHash,
-						Log:  "tx broadcast but no confirmation found in " + strconv.Itoa(timeout) + " seconds",
+						Info: "tx broadcast but no confirmation found in " + strconv.Itoa(timeout) + " seconds",
 					}, nil
 				} else {
 					return TxResponse{
 						Code: txRes.TxResponse.Code,
 						Hash: txRes.TxResponse.TxHash,
-						Log:  "tx confirmed",
+						Info: "tx confirmed",
 					}, nil
 				}
 			} else if broadcastRes.TxResponse.Code == 19 {
 				return TxResponse{
 					Code: broadcastRes.TxResponse.Code,
 					Hash: broadcastRes.TxResponse.TxHash,
-					Log:  "tx already in mempool",
+					Info: "tx already in mempool",
 				}, nil
 			} else if broadcastRes.TxResponse.Code == 32 {
 				return TxResponse{
 					Code: broadcastRes.TxResponse.Code,
 					Hash: broadcastRes.TxResponse.TxHash,
-					Log:  "tx sequence error",
+					Log:  broadcastRes.TxResponse.RawLog,
+					Info: "tx sequence error",
 				}, nil
 			} else if broadcastRes.TxResponse.Code == 13 {
 				return TxResponse{
 					Code: broadcastRes.TxResponse.Code,
 					Hash: broadcastRes.TxResponse.TxHash,
-					Log:  "insufficient fee",
+					Log:  broadcastRes.TxResponse.RawLog,
+					Info: "insufficient fee",
+				}, nil
+			} else if broadcastRes.TxResponse.Code == 11 {
+				return TxResponse{
+					Code: broadcastRes.TxResponse.Code,
+					Hash: broadcastRes.TxResponse.TxHash,
+					Log:  broadcastRes.TxResponse.RawLog,
+					Info: "out of gas",
 				}, nil
 			}
 		}

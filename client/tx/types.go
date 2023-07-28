@@ -38,9 +38,10 @@ type (
 	}
 
 	TxResponse struct {
-		Code uint32 `json:"code"`
-		Hash string `json:"hash"`
-		Log  string `json:"log"`
+		Code uint32 `json:"code,omitempty"`
+		Hash string `json:"hash,omitempty"`
+		Log  string `json:"log,omitempty"`
+		Info string `json:"info,omitempty"`
 	}
 
 	TxConfig struct {
