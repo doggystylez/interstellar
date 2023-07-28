@@ -58,23 +58,33 @@ type (
 
 	MsgMaker func(MsgInfo) sdk.Msg
 
-	WasmSwap struct {
-		Swap `json:"swap"`
+	ContractSwap struct {
+		Swap `json:"swap,omitempty"`
+	}
+
+	ContractIbcSwap struct {
+		OsmosisSwap Swap `json:"osmosis_swap,omitempty"`
 	}
 
 	Swap struct {
-		InputCoin   `json:"input_coin"`
-		OutputDenom string `json:"output_denom"`
-		Slippage    `json:"slippage"`
+		InputCoin        *Coin  `json:"input_coin,omitempty"`
+		OutputDenom      string `json:"output_denom,omitempty"`
+		OnFailedDelivery `json:"on_failed_delivery,omitempty"`
+		Receiver         string `json:"receiver,omitempty"`
+		Slippage         `json:"slippage,omitempty"`
 	}
 
-	InputCoin struct {
-		Denom  string `json:"denom"`
-		Amount string `json:"amount"`
+	Coin struct {
+		Denom  string `json:"denom,omitempty"`
+		Amount string `json:"amount,omitempty"`
+	}
+
+	OnFailedDelivery struct {
+		Addr string `json:"local_recovery_addr,omitempty"`
 	}
 
 	Slippage struct {
-		Twap `json:"twap"`
+		Twap `json:"twap,omitempty"`
 	}
 
 	Twap struct {
