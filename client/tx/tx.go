@@ -114,6 +114,12 @@ func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error)
 					Hash: broadcastRes.TxResponse.TxHash,
 					Log:  "tx sequence error",
 				}, nil
+			} else if broadcastRes.TxResponse.Code == 13 {
+				return TxResponse{
+					Code: broadcastRes.TxResponse.Code,
+					Hash: broadcastRes.TxResponse.TxHash,
+					Log:  "insufficient fee",
+				}, nil
 			}
 		}
 	}
