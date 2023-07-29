@@ -60,11 +60,11 @@ type (
 	MsgMaker func(MsgInfo) sdk.Msg
 
 	Swap struct {
-		InputCoin        *Coin  `json:"input_coin,omitempty"`
-		OutputDenom      string `json:"output_denom,omitempty"`
-		OnFailedDelivery `json:"on_failed_delivery,omitempty"`
-		Receiver         string `json:"receiver,omitempty"`
-		Slippage         `json:"slippage,omitempty"`
+		InputCoin         *Coin  `json:"input_coin,omitempty"`
+		OutputDenom       string `json:"output_denom,omitempty"`
+		*OnFailedDelivery `json:"on_failed_delivery,omitempty"`
+		Receiver          string `json:"receiver,omitempty"`
+		Slippage          `json:"slippage,omitempty"`
 	}
 
 	Coin struct {

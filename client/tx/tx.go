@@ -79,11 +79,14 @@ func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error)
 				time.Sleep(time.Duration(g.Interval) * time.Second)
 			}
 		} else {
+			code := broadcastRes.TxResponse.Code
+			hash := broadcastRes.TxResponse.TxHash
+			info, log := "", ""
 			if broadcastRes.TxResponse.Code == 0 {
 				if timeout == 0 {
 					return TxResponse{
-						Code: broadcastRes.TxResponse.Code,
-						Hash: broadcastRes.TxResponse.TxHash,
+						Code: code,
+						Hash: hash,
 						Info: "tx broadcast, not waiting for confirmation",
 					}, nil
 				}
@@ -96,40 +99,40 @@ func broadcastTx(txBytes []byte, timeout int, g grpc.Client) (TxResponse, error)
 						Info: "tx broadcast but no confirmation found in " + strconv.Itoa(timeout) + " seconds",
 					}, nil
 				} else {
+					code := txRes.TxResponse.Code
+					hash := txRes.TxResponse.TxHash
+					info, log := "", ""
+					if txRes.TxResponse.Code == 0 {
+						info = "tx confirmed"
+					} else {
+						log = broadcastRes.TxResponse.RawLog
+						info = "tx broadcast but failed"
+					}
 					return TxResponse{
-						Code: txRes.TxResponse.Code,
-						Hash: txRes.TxResponse.TxHash,
-						Info: "tx confirmed",
+						Code: code,
+						Hash: hash,
+						Log:  log,
+						Info: info,
 					}, nil
 				}
-			} else if broadcastRes.TxResponse.Code == 19 {
-				return TxResponse{
-					Code: broadcastRes.TxResponse.Code,
-					Hash: broadcastRes.TxResponse.TxHash,
-					Info: "tx already in mempool",
-				}, nil
-			} else if broadcastRes.TxResponse.Code == 32 {
-				return TxResponse{
-					Code: broadcastRes.TxResponse.Code,
-					Hash: broadcastRes.TxResponse.TxHash,
-					Log:  broadcastRes.TxResponse.RawLog,
-					Info: "tx sequence error",
-				}, nil
-			} else if broadcastRes.TxResponse.Code == 13 {
-				return TxResponse{
-					Code: broadcastRes.TxResponse.Code,
-					Hash: broadcastRes.TxResponse.TxHash,
-					Log:  broadcastRes.TxResponse.RawLog,
-					Info: "insufficient fee",
-				}, nil
-			} else if broadcastRes.TxResponse.Code == 11 {
-				return TxResponse{
-					Code: broadcastRes.TxResponse.Code,
-					Hash: broadcastRes.TxResponse.TxHash,
-					Log:  broadcastRes.TxResponse.RawLog,
-					Info: "out of gas",
-				}, nil
+			} else if code == 19 {
+				info = "tx already in mempool"
+			} else if code == 32 {
+				log = broadcastRes.TxResponse.RawLog
+				info = "tx sequence error"
+			} else if code == 13 {
+				log = broadcastRes.TxResponse.RawLog
+				info = "insufficient fee"
+			} else if code == 11 {
+				log = broadcastRes.TxResponse.RawLog
+				info = "out of gas"
 			}
+			return TxResponse{
+				Code: code,
+				Hash: hash,
+				Log:  log,
+				Info: info,
+			}, nil
 		}
 	}
 	return TxResponse{}, errors.New("failed sending tx after " + strconv.Itoa(g.Retries+1) + " attempts. last err: " + err.Error())
