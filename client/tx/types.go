@@ -38,9 +38,10 @@ type (
 	}
 
 	TxResponse struct {
-		Code uint32 `json:"code"`
-		Hash string `json:"hash"`
-		Log  string `json:"log"`
+		Code uint32 `json:"code,omitempty"`
+		Hash string `json:"hash,omitempty"`
+		Log  string `json:"log,omitempty"`
+		Info string `json:"info,omitempty"`
 	}
 
 	TxConfig struct {
@@ -67,11 +68,11 @@ type (
 	}
 
 	Swap struct {
-		InputCoin        *Coin  `json:"input_coin,omitempty"`
-		OutputDenom      string `json:"output_denom,omitempty"`
-		OnFailedDelivery `json:"on_failed_delivery,omitempty"`
-		Receiver         string `json:"receiver,omitempty"`
-		Slippage         `json:"slippage,omitempty"`
+		InputCoin         *Coin  `json:"input_coin,omitempty"`
+		OutputDenom       string `json:"output_denom,omitempty"`
+		*OnFailedDelivery `json:"on_failed_delivery,omitempty"`
+		Receiver          string `json:"receiver,omitempty"`
+		Slippage          `json:"slippage,omitempty"`
 	}
 
 	Coin struct {
